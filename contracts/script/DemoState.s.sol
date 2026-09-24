@@ -19,7 +19,7 @@ import {Stokvel} from "../src/Stokvel.sol";
 /// deployments/demo-ledger.json, which the mock Investec server loads, so bank and chain agree.
 ///
 /// Keys: the relayer and attestor are Anvil accounts 1 and 2 unless RELAYER_PK / ATTESTOR_PK are set.
-/// Members sign with Anvil accounts 3 to 8, or with the keys in MEMBERS_KEYS_FILE (cards/out/keys.json).
+/// Members sign with Anvil accounts 3 to 8, or with the keys in MEMBERS_KEYS_FILE (cards/out/members.json).
 contract DemoState is Script {
     string internal constant ANVIL_MNEMONIC = "test test test test test test test test test test test junk";
     string[6] internal NAMES = ["Lerato", "Thabo", "Aisha", "Johan", "Priya", "Sipho"];
@@ -116,8 +116,9 @@ contract DemoState is Script {
     function memberPk(uint256 i) internal returns (uint256) {
         string memory file = vm.envOr("MEMBERS_KEYS_FILE", string(""));
         if (bytes(file).length == 0) return vm.deriveKey(ANVIL_MNEMONIC, uint32(3 + i));
-        uint256[] memory pks = vm.parseJsonUintArray(vm.readFile(file), ".privateKeys");
-        return pks[i];
+        // keys are stored as 0x hex strings; JSON numbers can't hold 256 bits
+        bytes32[] memory pks = vm.parseJsonBytes32Array(vm.readFile(file), ".privateKeys");
+        return uint256(pks[i]);
     }
 
     function beneficiaryId(uint8 i) internal returns (bytes32) {

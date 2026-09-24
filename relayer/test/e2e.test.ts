@@ -66,7 +66,7 @@ describe.skipIf(!run)("relayer end to end", () => {
     const reserves = createReservesLoop({ investec, accountId: POOL_ACCOUNT_ID, contract, publicClient: clients.publicClient, attestor: clients.attestor, chainId: 31337, address: cfg.stokvel, log, feed });
     const payouts = createPayoutLoop({ investec, accountId: POOL_ACCOUNT_ID, method: "pay", members: cfg.members, contract, publicClient: clients.publicClient, log, feed });
     loops = { poll: () => contributions.poll(), reserves: () => reserves.tick(), payouts: async () => ({ close: await payouts.tryClose(), settled: await payouts.settle() }) };
-    relayerApp = createHttpApp({ cfg, contract, contractV1, publicClient: clients.publicClient, contributions, reservesTick: reserves.tick, payoutsTick: loops.payouts, feed, log, status: () => ({}) });
+    relayerApp = createHttpApp({ cfg, contract, contractV1, publicClient: clients.publicClient, contributions, reservesTick: reserves.tick, payoutsTick: loops.payouts, feed, log, status: () => ({}), investec, accountId: POOL_ACCOUNT_ID });
   }, 60_000);
 
   afterAll(() => {
