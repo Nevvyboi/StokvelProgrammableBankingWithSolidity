@@ -1,0 +1,15 @@
+title = "stokvel talk"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "build output and dependencies"
+paths = [
+  '''node_modules''',
+  '''\.next''',
+  '''contracts/lib''',
+  '''contracts/out''',
+  '''contracts/cache''',
+  '''package-lock\.json''',
+]
