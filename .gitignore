@@ -1,0 +1,27 @@
+# secrets: never commit these
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+cards/out/
+keys.json
+**/deployer*.json
+**/*.keystore
+
+# build output
+node_modules/
+.next/
+out/
+dist/
+contracts/cache/
+contracts/out/
+contracts/broadcast/
+*.tsbuildinfo
+__pycache__/
+*.pyc
+
+# local runtime
+.demo/
+*.log
+.DS_Store
