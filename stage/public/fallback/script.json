@@ -1,0 +1,161 @@
+[
+  {
+    "title": "DEMO 1: the committee signs",
+    "payload": {
+      "feed": [
+        { "seq": 1001, "at": 0, "kind": "vote", "title": "Member joined", "detail": "Priya signed the constitution", "hash": "0xfa11back0000000000000000000000000000000000000000000000000000001" },
+        { "seq": 1002, "at": 0, "kind": "vote", "title": "Member joined", "detail": "Sipho signed the constitution", "hash": "0xfa11back0000000000000000000000000000000000000000000000000000002" }
+      ]
+    }
+  },
+  {
+    "title": "DEMO 2: Aisha swipes R87, R3 rounds up",
+    "payload": {
+      "feed": [
+        { "seq": 1003, "at": 0, "kind": "bank->chain", "title": "Contribution recorded", "detail": "STK-03: 300 cents", "hash": "0xfa11back0000000000000000000000000000000000000000000000000000003" }
+      ],
+      "patch": { "pot": "2000300", "totalIn": "11000300" },
+      "bank": {
+        "accountId": "1111122222333334444455555",
+        "balance": { "currentBalance": 20003, "currency": "ZAR" },
+        "at": 0,
+        "transactions": [
+          { "type": "CREDIT", "description": "STK-03", "amount": 3, "transactionDate": "2026-11-24", "uuid": "fb-1", "postedOrder": 101 },
+          { "type": "CREDIT", "description": "STK-04", "amount": 5000, "transactionDate": "2026-11-23", "uuid": "fb-2", "postedOrder": 100 },
+          { "type": "CREDIT", "description": "STK-03", "amount": 5000, "transactionDate": "2026-11-23", "uuid": "fb-3", "postedOrder": 99 },
+          { "type": "CREDIT", "description": "STK-02", "amount": 5000, "transactionDate": "2026-11-23", "uuid": "fb-4", "postedOrder": 98 },
+          { "type": "CREDIT", "description": "STK-01", "amount": 5000, "transactionDate": "2026-11-23", "uuid": "fb-5", "postedOrder": 97 },
+          { "type": "DEBIT", "description": "Stokvel payout to Thabo", "amount": 30000, "transactionDate": "2026-11-23", "uuid": "fb-6", "postedOrder": 96 }
+        ]
+      },
+      "events": [
+        { "name": "ContributionRecorded", "args": { "round": "2", "memberId": 2, "cents": "300", "investecRef": "0xfa11back03" }, "blockNumber": "900", "txHash": "0xfa11back0000000000000000000000000000000000000000000000000000003", "logIndex": 0 }
+      ]
+    }
+  },
+  {
+    "title": "Priya and Sipho pay",
+    "payload": {
+      "feed": [
+        { "seq": 1004, "at": 0, "kind": "bank->chain", "title": "Contribution recorded", "detail": "STK-05: 500000 cents", "hash": "0xfa11back0000000000000000000000000000000000000000000000000000004" },
+        { "seq": 1005, "at": 0, "kind": "bank->chain", "title": "Contribution recorded", "detail": "STK-06: 500000 cents", "hash": "0xfa11back0000000000000000000000000000000000000000000000000000005" },
+        { "seq": 1006, "at": 0, "kind": "reserves", "title": "Reserves attested", "detail": "bank holds 3000300 cents, club is owed 3000300", "hash": "0xfa11back0000000000000000000000000000000000000000000000000000006" }
+      ],
+      "patch": { "pot": "3000300", "totalIn": "12000300", "reservesCents": "3000300", "fresh": true },
+      "bank": {
+        "accountId": "1111122222333334444455555",
+        "balance": { "currentBalance": 30003, "currency": "ZAR" },
+        "at": 0,
+        "transactions": [
+          { "type": "CREDIT", "description": "STK-06", "amount": 5000, "transactionDate": "2026-11-24", "uuid": "fb-8", "postedOrder": 103 },
+          { "type": "CREDIT", "description": "STK-05", "amount": 5000, "transactionDate": "2026-11-24", "uuid": "fb-7", "postedOrder": 102 },
+          { "type": "CREDIT", "description": "STK-03", "amount": 3, "transactionDate": "2026-11-24", "uuid": "fb-1", "postedOrder": 101 },
+          { "type": "CREDIT", "description": "STK-04", "amount": 5000, "transactionDate": "2026-11-23", "uuid": "fb-2", "postedOrder": 100 },
+          { "type": "CREDIT", "description": "STK-03", "amount": 5000, "transactionDate": "2026-11-23", "uuid": "fb-3", "postedOrder": 99 },
+          { "type": "CREDIT", "description": "STK-02", "amount": 5000, "transactionDate": "2026-11-23", "uuid": "fb-4", "postedOrder": 98 },
+          { "type": "CREDIT", "description": "STK-01", "amount": 5000, "transactionDate": "2026-11-23", "uuid": "fb-5", "postedOrder": 97 }
+        ]
+      },
+      "events": [
+        { "name": "ContributionRecorded", "args": { "round": "2", "memberId": 4, "cents": "500000", "investecRef": "0xfa11back05" }, "blockNumber": "901", "txHash": "0xfa11back0000000000000000000000000000000000000000000000000000004", "logIndex": 0 },
+        { "name": "ContributionRecorded", "args": { "round": "2", "memberId": 5, "cents": "500000", "investecRef": "0xfa11back06" }, "blockNumber": "902", "txHash": "0xfa11back0000000000000000000000000000000000000000000000000000005", "logIndex": 0 }
+      ]
+    }
+  },
+  {
+    "title": "DEMO 3: month end, Aisha is paid",
+    "payload": {
+      "feed": [
+        { "seq": 1007, "at": 0, "kind": "info", "title": "Clock moved", "detail": "to month end" },
+        { "seq": 1008, "at": 0, "kind": "info", "title": "Round closed", "detail": "the pot is due to the next member in rotation", "hash": "0xfa11back0000000000000000000000000000000000000000000000000000007" },
+        { "seq": 1009, "at": 0, "kind": "chain->bank", "title": "Paid Aisha R30,003.00", "detail": "Investec ref UBP0000000031" },
+        { "seq": 1010, "at": 0, "kind": "bank->chain", "title": "Payout settled", "detail": "round 3 confirmed on chain", "hash": "0xfa11back0000000000000000000000000000000000000000000000000000008" }
+      ],
+      "patch": { "round": "3", "pot": "0", "unsettled": "0", "settledOut": "9000300", "recipient": 3, "reservesCents": "0" },
+      "bank": {
+        "accountId": "1111122222333334444455555",
+        "balance": { "currentBalance": 0, "currency": "ZAR" },
+        "at": 0,
+        "transactions": [
+          { "type": "DEBIT", "description": "Stokvel payout to Aisha", "amount": 30003, "transactionDate": "2026-12-23", "uuid": "fb-9", "postedOrder": 104 },
+          { "type": "CREDIT", "description": "STK-06", "amount": 5000, "transactionDate": "2026-11-24", "uuid": "fb-8", "postedOrder": 103 },
+          { "type": "CREDIT", "description": "STK-05", "amount": 5000, "transactionDate": "2026-11-24", "uuid": "fb-7", "postedOrder": 102 },
+          { "type": "CREDIT", "description": "STK-03", "amount": 3, "transactionDate": "2026-11-24", "uuid": "fb-1", "postedOrder": 101 }
+        ]
+      },
+      "events": [
+        { "name": "PayoutDue", "args": { "round": "2", "memberId": 2, "cents": "3000300" }, "blockNumber": "903", "txHash": "0xfa11back0000000000000000000000000000000000000000000000000000007", "logIndex": 0 },
+        { "name": "PayoutSettled", "args": { "round": "2", "memberId": 2, "cents": "3000300" }, "blockNumber": "904", "txHash": "0xfa11back0000000000000000000000000000000000000000000000000000008", "logIndex": 0 }
+      ]
+    }
+  },
+  {
+    "title": "DEMO 4: the treasurer takes R1,000",
+    "payload": {
+      "feed": [
+        { "seq": 1011, "at": 0, "kind": "reserves", "title": "Reserves short", "detail": "bank holds 2900000 cents, club is owed 3000000", "error": "ReservesShort(2900000, 3000000)" },
+        { "seq": 1012, "at": 0, "kind": "refused", "title": "Payout frozen", "detail": "bank holds 2900000, club is owed 3000000", "error": "ReservesShort(2900000, 3000000)" }
+      ],
+      "patch": { "pot": "3000000", "reservesCents": "2900000", "fresh": true },
+      "bank": {
+        "accountId": "1111122222333334444455555",
+        "balance": { "currentBalance": 29000, "currency": "ZAR" },
+        "at": 0,
+        "transactions": [
+          { "type": "DEBIT", "description": "Admin fees", "amount": 1000, "transactionDate": "2027-01-20", "uuid": "fb-10", "postedOrder": 111 },
+          { "type": "CREDIT", "description": "STK-06", "amount": 5000, "transactionDate": "2027-01-05", "uuid": "fb-16", "postedOrder": 110 },
+          { "type": "CREDIT", "description": "STK-05", "amount": 5000, "transactionDate": "2027-01-05", "uuid": "fb-15", "postedOrder": 109 },
+          { "type": "CREDIT", "description": "STK-04", "amount": 5000, "transactionDate": "2027-01-05", "uuid": "fb-14", "postedOrder": 108 },
+          { "type": "CREDIT", "description": "STK-03", "amount": 5000, "transactionDate": "2027-01-05", "uuid": "fb-13", "postedOrder": 107 },
+          { "type": "CREDIT", "description": "STK-02", "amount": 5000, "transactionDate": "2027-01-05", "uuid": "fb-12", "postedOrder": 106 },
+          { "type": "CREDIT", "description": "STK-01", "amount": 5000, "transactionDate": "2027-01-05", "uuid": "fb-11", "postedOrder": 105 }
+        ]
+      },
+      "alarm": { "kind": "ReservesShort", "title": "Payout frozen", "detail": "ReservesShort(2900000, 3000000)" }
+    }
+  },
+  {
+    "title": "DEMO 5: the same webhook twice",
+    "payload": {
+      "feed": [
+        { "seq": 1013, "at": 0, "kind": "refused", "title": "Contract refused", "detail": "AlreadyRecorded(0x7c1d…e3a9)", "error": "AlreadyRecorded(0x7c1d9b…e3a9)" }
+      ],
+      "alarm": { "kind": "AlreadyRecorded", "title": "Contract refused", "detail": "AlreadyRecorded(0x7c1d9b…e3a9)" }
+    }
+  },
+  {
+    "title": "DEMO 7: four cards vote, R5,000 to R6,000",
+    "payload": {
+      "feed": [
+        { "seq": 1014, "at": 0, "kind": "vote", "title": "Proposal opened", "detail": "#0 raise the contribution to R6,000" },
+        { "seq": 1015, "at": 0, "kind": "vote", "title": "Vote counted", "detail": "Lerato, 1 of 6" },
+        { "seq": 1016, "at": 0, "kind": "vote", "title": "Vote counted", "detail": "Thabo, 2 of 6" },
+        { "seq": 1017, "at": 0, "kind": "vote", "title": "Vote counted", "detail": "Aisha, 3 of 6" },
+        { "seq": 1018, "at": 0, "kind": "vote", "title": "Vote counted", "detail": "Johan, 4 of 6: majority, timelock started" },
+        { "seq": 1019, "at": 0, "kind": "vote", "title": "Proposal executed", "detail": "contribution is now R6,000" }
+      ],
+      "patch": { "contributionCents": "600000" }
+    }
+  },
+  {
+    "title": "DEMO 8: Sipho's card is stolen, 04b takes over",
+    "payload": {
+      "feed": [
+        { "seq": 1020, "at": 0, "kind": "vote", "title": "Proposal opened", "detail": "#1 move Sipho to card 04b" },
+        { "seq": 1021, "at": 0, "kind": "vote", "title": "Proposal executed", "detail": "KeyRotated: 06 Sipho now signs with 04b" },
+        { "seq": 1022, "at": 0, "kind": "refused", "title": "Vote refused", "detail": "the stolen card", "error": "NotMember(0x23618e…1E8f)" },
+        { "seq": 1023, "at": 0, "kind": "vote", "title": "Vote counted", "detail": "Sipho, with card 04b" }
+      ],
+      "alarm": { "kind": "Refused", "title": "Vote refused", "detail": "NotMember(0x23618e…1E8f)" }
+    }
+  },
+  {
+    "title": "Kill the server, then bring it back",
+    "payload": {
+      "feed": [
+        { "seq": 1024, "at": 0, "kind": "info", "title": "Relayer stopped", "detail": "by the presenter" },
+        { "seq": 1025, "at": 0, "kind": "info", "title": "Relayer back", "detail": "replayed the bank and the chain, nothing sent twice" }
+      ]
+    }
+  }
+]

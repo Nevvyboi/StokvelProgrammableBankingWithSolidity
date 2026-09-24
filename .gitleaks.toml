@@ -12,4 +12,7 @@ paths = [
   '''contracts/out''',
   '''contracts/cache''',
   '''package-lock\.json''',
+  '''stage/public/fallback/snapshot\.json''',
+  '''cards/out/''',
 ]
+# cards/out is gitignored and is where the card generator keeps the throwaway testnet keys on purpose

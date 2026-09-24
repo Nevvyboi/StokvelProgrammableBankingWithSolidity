@@ -9,6 +9,10 @@ import type { Logger } from "./log.js";
 import type { Config } from "./config.js";
 import type { ContributionLoop } from "./loops/contributions.js";
 import type { Transaction } from "./investec/types.js";
+import type { InvestecClient } from "./investec/client.js";
+
+/** BigInts don't survive JSON.stringify; the admin routes return loop results that carry them. */
+const safe = (v: unknown) => JSON.parse(JSON.stringify(v, (_k, x) => (typeof x === "bigint" ? x.toString() : x)));
 
 export type HttpDeps = {
   cfg: Config;
@@ -21,6 +25,9 @@ export type HttpDeps = {
   feed: Feed;
   log: Logger;
   status: () => Record<string, unknown>;
+  investec: InvestecClient;
+  accountId: string;
+  onKill?: () => void;
 };
 
 /**
@@ -33,6 +40,16 @@ export function createHttpApp(d: HttpDeps) {
   app.use("*", cors());
 
   app.get("/health", (c) => c.json({ ok: true, ...d.status() }));
+
+  /** What the dashboard's left half shows. The stage app never holds Investec credentials. */
+  app.get("/bank", async (c) => {
+    try {
+      const [balance, transactions] = await Promise.all([d.investec.balance(d.accountId), d.investec.transactions(d.accountId)]);
+      return c.json({ accountId: d.accountId, balance, transactions: transactions.slice(-15).reverse(), at: Date.now() });
+    } catch (err) {
+      return c.json({ error: String(err).split("\n")[0] }, 502);
+    }
+  });
   app.get("/feed", (c) => c.json(feed.since(Number(c.req.query("since") ?? 0))));
   app.get("/feed/stream", (c) =>
     streamSSE(c, async (stream) => {
@@ -127,9 +144,9 @@ export function createHttpApp(d: HttpDeps) {
   const admin = new Hono();
   admin.post("/tick", async (c) => {
     const [r, p] = await Promise.all([d.reservesTick(), d.payoutsTick()]);
-    return c.json({ reserves: r, payouts: p });
+    return c.json(safe({ reserves: r, payouts: p }));
   });
-  admin.post("/poll", async (c) => c.json(await d.contributions.poll()));
+  admin.post("/poll", async (c) => c.json(safe(await d.contributions.poll())));
 
   /** Anvil only: move the clock to the end of the round and mine a block. */
   admin.post("/warp", async (c) => {
@@ -151,6 +168,13 @@ export function createHttpApp(d: HttpDeps) {
     const b = (await c.req.json()) as { transaction: Transaction; target?: "v1" | "v2" };
     const target = b.target === "v1" && d.contractV1 ? d.contractV1 : contract;
     return c.json({ result: await d.contributions.record(b.transaction, { via: "webhook", target }) });
+  });
+
+  /** DEMO "kill the server": exit, and let the launcher's restart loop bring a fresh process up. */
+  admin.post("/kill", (c) => {
+    feed.push({ kind: "info", title: "Relayer stopped", detail: "by the presenter" });
+    setTimeout(() => (d.onKill ? d.onKill() : process.exit(0)), 200);
+    return c.json({ ok: true });
   });
 
   app.route("/admin", admin);

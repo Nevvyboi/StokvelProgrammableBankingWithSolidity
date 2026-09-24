@@ -82,6 +82,7 @@ async function main() {
     shadow,
   });
 
+  const startedAt = Date.now();
   const state = { lastPoll: 0, lastReserves: 0, errors: 0 };
   const guard = (name: string, fn: () => Promise<unknown>) => async () => {
     try {
@@ -124,7 +125,9 @@ async function main() {
     payoutsTick: async () => ({ close: await payouts.tryClose(), settled: await payouts.settle() }),
     feed,
     log,
-    status: () => ({ ...state, mode: cfg.INVESTEC_MODE, chainId: cfg.CHAIN_ID, stokvel: cfg.stokvel, stokvelV1: cfg.stokvelV1, account: account.accountId, relayer: relayer.address, attestor: attestor.address }),
+    status: () => ({ ...state, startedAt, mode: cfg.INVESTEC_MODE, chainId: cfg.CHAIN_ID, stokvel: cfg.stokvel, stokvelV1: cfg.stokvelV1, account: account.accountId, relayer: relayer.address, attestor: attestor.address }),
+    investec,
+    accountId: account.accountId,
   });
   serve({ fetch: app.fetch, port: cfg.PORT, hostname: "0.0.0.0" }, () => log.info({ port: cfg.PORT }, "relayer listening"));
 }

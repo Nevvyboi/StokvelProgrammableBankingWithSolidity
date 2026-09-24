@@ -1,0 +1,183 @@
+@import "tailwindcss";
+@import "@fontsource-variable/space-grotesk";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
+
+@theme {
+  --color-bg: #0b1426;
+  --color-surface: #13203a;
+  --color-surface-2: #1a2a48;
+  --color-line: #2a3b5e;
+  --color-rule: #223252;
+  --color-text: #f4f1ea;
+  --color-muted: #8a96ad;
+  --color-primary: #2ec4b6;
+  --color-danger: #ff5a5f;
+  --color-success: #3ddc97;
+  --color-paper: #f4f1ea;
+  --color-ink: #0b1426;
+  --color-lerato: #f4a261;
+  --color-thabo: #2a9d8f;
+  --color-aisha: #e76f51;
+  --color-johan: #8ab17d;
+  --color-priya: #b388eb;
+  --color-sipho: #e9c46a;
+  --font-display: "Space Grotesk Variable", "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter Variable", "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum" 1, "cv11" 1;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+.font-mono {
+  font-family: var(--font-mono);
+}
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* A page of the book: a running header with a hairline under it, nothing else. */
+.page {
+  border-top: 1px solid var(--color-text);
+  padding-top: 0.6rem;
+}
+.running-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.95rem;
+  color: var(--color-muted);
+}
+.running-head b {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+/* Ledger ruling: one hairline per row, figures aligned right. */
+.ledger {
+  width: 100%;
+  border-collapse: collapse;
+}
+.ledger td,
+.ledger th {
+  border-bottom: 1px solid var(--color-rule);
+  padding: 0.45rem 0;
+  vertical-align: baseline;
+}
+.ledger.roster td {
+  padding: 0.3rem 0;
+  vertical-align: middle;
+}
+.ledger th {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  text-align: left;
+  letter-spacing: 0.04em;
+}
+.ledger td.num,
+.ledger th.num {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A rubber stamp. Rotated a touch, double rule, never perfectly aligned. */
+.stamp {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 3px double currentColor;
+  padding: 0.05em 0.5em;
+  line-height: 1.2;
+  transform: rotate(-4deg);
+  opacity: 0.92;
+}
+.stamp.soft {
+  border-style: solid;
+  border-width: 1.5px;
+  opacity: 0.7;
+}
+
+/* The marginal note, in a member's colour, like a pencil in the margin. */
+.margin-note {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+}
+
+.hairline {
+  border-top: 1px solid var(--color-rule);
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.slide-in {
+  animation: slide-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.35s ease-out both;
+}
+
+@keyframes patch-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.patch-in {
+  animation: patch-in 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+@keyframes alarm-field {
+  0%,
+  100% {
+    background: #8c1f24;
+  }
+  50% {
+    background: #a8262d;
+  }
+}
+.alarm {
+  animation: alarm-field 1.4s ease-in-out infinite;
+}

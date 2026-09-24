@@ -208,7 +208,8 @@ export function createMockApp(o: MockOptions) {
   admin.post("/double-webhook", async (c) => {
     const body = (await c.req.json().catch(() => ({}))) as { id?: string; times?: number };
     const list = ledger.txs.get(POOL_ACCOUNT_ID)!;
-    const tx = body.id ? list.find((t) => t.id === body.id) : [...list].reverse().find((t) => t.type === "CREDIT");
+    // the latest member contribution, not just any credit (a refund has no STK reference)
+    const tx = body.id ? list.find((t) => t.id === body.id) : [...list].reverse().find((t) => t.type === "CREDIT" && /STK/i.test(t.description));
     if (!tx) return c.json({ error: "no credit to replay" }, 404);
     const times = Number(body.times ?? 2);
     for (let i = 0; i < times; i++) await push(tx);
