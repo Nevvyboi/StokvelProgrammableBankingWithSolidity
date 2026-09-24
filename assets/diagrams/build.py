@@ -46,7 +46,9 @@ STYLE = """
 
 
 def svg(body: str, w: int = W, h: int = H) -> str:
-    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" data-theme="dark">{STYLE}<rect class="bg" width="{w}" height="{h}"/>{body}</svg>'
+    # slide diagrams are drawn on an 80px margin and nudged in to the deck's 0.9in margin (108px of 1600)
+    inner = body if w != W else f'<g transform="translate(28 16) scale(0.965)">{body}</g>'
+    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" data-theme="dark">{STYLE}<rect class="bg" width="{w}" height="{h}"/>{inner}</svg>'
 
 
 def patch(x: float, y: float, size: float, colour: str, seed: str, base: str = "var(--surface)", n: int = 4) -> str:
