@@ -1,0 +1,54 @@
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.24"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+offline = true
+# the V1 invariant suite is meant to fail; it runs in its own profile
+no_match_contract = "InvariantV1"
+fs_permissions = [
+  { access = "read", path = "./" },
+  { access = "read", path = "../cards/out" },
+  { access = "read-write", path = "./deployments" },
+]
+
+[profile.default.fuzz]
+runs = 512
+
+[profile.default.invariant]
+runs = 100
+depth = 100
+fail_on_revert = false
+
+# ./scripts/fuzz.sh uses this profile: 100 runs x 100 calls = 10,000 random actions
+[profile.v1]
+match_contract = "InvariantV1"
+no_match_contract = "NONE"
+
+[profile.v1.invariant]
+runs = 100
+depth = 100
+fail_on_revert = false
+
+[profile.ci.invariant]
+runs = 500
+depth = 200
+
+[rpc_endpoints]
+anvil = "http://127.0.0.1:8545"
+base_sepolia = "${BASE_SEPOLIA_RPC_URL}"
+
+[etherscan]
+base_sepolia = { key = "${BASESCAN_API_KEY}", chain = 84532, url = "https://api-sepolia.basescan.org/api" }
+
+[fmt]
+line_length = 110
+
+[lint]
+# timestamps only gate hour and day windows, and member ids are capped at 64 by the constructor
+exclude_lints = ["block-timestamp", "unsafe-typecast"]
