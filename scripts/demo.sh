@@ -57,6 +57,10 @@ done
 step() { printf '\n\033[36m▸ %s\033[0m\n' "$*"; }
 
 # ---------------------------------------------------------------- dependencies
+if [[ ! -f contracts/lib/forge-std/src/Test.sol ]]; then
+  step "fetching contract dependencies (git submodules)"
+  git submodule update --init --recursive
+fi
 [[ -d relayer/node_modules ]] || (step "installing relayer deps" && (cd relayer && npm install --no-audit --no-fund >/dev/null))
 [[ -d stage/node_modules ]] || (step "installing stage deps" && (cd stage && npm install --no-audit --no-fund >/dev/null))
 
