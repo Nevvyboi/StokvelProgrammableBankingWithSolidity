@@ -141,7 +141,7 @@ contract DemoState is Script {
             description,
             '","at":',
             vm.toString(block.timestamp),
-            "}\n"
+            "}"
         );
         vm.writeLine("deployments/demo-ledger.jsonl", line);
     }

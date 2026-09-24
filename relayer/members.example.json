@@ -1,0 +1,11 @@
+{
+  "_comment": "memberId is zero based. Bank reference STK-03 is member 03, memberId 2. investecId is the beneficiaryId (PAYOUT_METHOD=pay) or the accountId (PAYOUT_METHOD=transfer) that receives this member's payout. Its keccak256 must match the beneficiaryHash the contract was deployed with. These ids are the mock bank's.",
+  "members": [
+    { "memberId": 0, "number": "01", "name": "Lerato", "colour": "#F4A261", "investecId": "beneficiary:Lerato" },
+    { "memberId": 1, "number": "02", "name": "Thabo", "colour": "#2A9D8F", "investecId": "beneficiary:Thabo" },
+    { "memberId": 2, "number": "03", "name": "Aisha", "colour": "#E76F51", "investecId": "beneficiary:Aisha" },
+    { "memberId": 3, "number": "04", "name": "Johan", "colour": "#8AB17D", "investecId": "beneficiary:Johan" },
+    { "memberId": 4, "number": "05", "name": "Priya", "colour": "#B388EB", "investecId": "beneficiary:Priya" },
+    { "memberId": 5, "number": "06", "name": "Sipho", "colour": "#E9C46A", "investecId": "beneficiary:Sipho" }
+  ]
+}
