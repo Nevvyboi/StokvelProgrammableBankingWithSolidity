@@ -120,10 +120,12 @@ cd relayer && npm test && npm run test:e2e   # the mock bank, the card code, all
 Information, "Sandbox") in `relayer/.env` and run `npm run smoke:sandbox`. The relayer works
 against the sandbox: OAuth, accounts, balance, transactions, beneficiaries and transfers. One thing
 to know: **the sandbox is stateless**, so a transfer returns a real payment reference and then
-nothing moves. The demos where money moves therefore run on `relayer/src/mock`, a stateful mirror
-of the same API, and `INVESTEC_SHADOW=sandbox` fires every payout at the real sandbox as well so
-the real response sits next to the moving balance. Every field name and endpoint the code relies on
-is written down with its source in [`docs/INVESTEC_API_NOTES.md`](docs/INVESTEC_API_NOTES.md).
+nothing moves. `./scripts/demo.sh --sandbox` puts the sandbox overlay (`relayer/src/overlay`) in
+front of it: a proxy that forwards everything and remembers each transfer the sandbox accepted,
+under the sandbox's own reference, folding it into the next balance and transaction read. The
+sandbox forgets, the proxy remembers, nothing is invented. The offline default, `--mock`, is a
+stateful mirror of the same API. Every field name and endpoint the code relies on is written down
+with its source in [`docs/INVESTEC_API_NOTES.md`](docs/INVESTEC_API_NOTES.md).
 
 **Base Sepolia.** Fund three throwaway keys, run `cards/generate.py` so the printed keys are the
 members, set `FIRST_ROUND_ENDS_AT` to a time during the talk, and deploy with

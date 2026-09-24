@@ -10,7 +10,7 @@ const seedFile = process.env.MOCK_SEED_FILE ?? resolve(process.cwd(), "..", "con
 
 const ledger = new Ledger();
 const loaded = ledger.seed(seedFile);
-const app = createMockApp({ ledger, log, relayerWebhookUrl, selfUrl: `http://127.0.0.1:${port}`, cardDir: resolve(process.cwd(), "..", "card") });
+const app = createMockApp({ ledger, log, relayerWebhookUrl, selfUrl: `http://127.0.0.1:${port}`, cardDir: resolve(process.cwd(), "..", "card"), stateless: process.env.MOCK_STATELESS === "true" });
 
 serve({ fetch: app.fetch, port, hostname: "0.0.0.0" }, () => {
   log.info({ port, seeded: loaded, balance: ledger.balance("1111122222333334444455555").currentBalance }, "mock Investec is up");

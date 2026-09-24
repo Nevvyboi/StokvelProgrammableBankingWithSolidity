@@ -11,6 +11,7 @@
     "start": "tsx src/index.ts",
     "dev": "tsx watch src/index.ts",
     "mock": "tsx src/mock/index.ts",
+    "overlay": "tsx src/overlay/index.ts",
     "smoke:sandbox": "tsx scripts/sandbox-smoke.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

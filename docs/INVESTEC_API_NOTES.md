@@ -132,11 +132,15 @@ code uses `(cents / 100).toFixed(2)` instead.
 1. **The sandbox is stateless.** From the spec's own quickstart: "balances won't be updated when
    transfers are made in the sandbox", and "all actions are immutable and can be run multiple times".
    A `transfermultiple` returns a real `PaymentReferenceNumber` and then nothing changes. No new
-   transaction appears on either account. This is the reason `relayer/src/mock` exists: the demos
-   where money moves (round-up lands, payout drops the balance, treasurer theft) need a stateful bank.
-   The mock reproduces the sandbox's routes and shapes exactly, and the relayer can't tell them
-   apart. `INVESTEC_SHADOW=sandbox` sends every payout to the real sandbox as well and logs the
-   response, so the talk can show a real Investec answer next to the moving balance.
+   transaction appears on either account. The fix is `relayer/src/overlay`: a proxy in front of the
+   sandbox that records each accepted transfer under the sandbox's own `PaymentReferenceNumber` and
+   folds those into the sandbox's balance, transaction and beneficiary responses. The sandbox does
+   the accepting, the auth and every unchanged route; the overlay only remembers. Overlay rows carry
+   `uuid` `<PaymentReferenceNumber>:CREDIT` or `:DEBIT`, `postedOrder` continuing from the sandbox's
+   last row, and `runningBalance` continuing from the sandbox's balance, so the relayer's poll
+   cursor works unchanged. `relayer/src/mock` stays for offline runs and tests; with
+   `MOCK_STATELESS=true` it behaves like the real sandbox, which is how the overlay is tested.
+   `INVESTEC_SHADOW=sandbox` in mock mode sends every payout to the real sandbox as well.
 2. **No transaction webhooks.** The PB API is poll only. The mock adds a push to the relayer's
    `/webhook/transaction` because the "double webhook" story needs one; it is labelled as a mock
    convenience in the code and on the slide.

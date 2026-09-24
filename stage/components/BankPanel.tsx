@@ -13,7 +13,7 @@ export function BankPanel({ bank, up, mode }: { bank: BankState | null; up: bool
         <span>
           <b>Investec</b> · Private Bank Account · The Q4 Stokvel
         </span>
-        <span className="font-mono text-sm">{mode === "sandbox" ? "sandbox" : "sandbox mirror"}{up ? "" : " · offline"}</span>
+        <span className="font-mono text-sm">{mode === "sandbox" ? "sandbox, remembered" : "sandbox mirror"}{up ? "" : " · offline"}</span>
       </div>
 
       <div className="mt-8 flex items-baseline justify-between">

@@ -2,8 +2,9 @@
 # The whole demo in one command.
 #
 #   ./scripts/demo.sh --mock       Anvil + deploy + seeded state + mock Investec + relayer + stage app
-#   ./scripts/demo.sh --sandbox    the same, but the relayer talks to the real Investec sandbox
-#                                  (needs INVESTEC_* in relayer/.env; the sandbox is stateless, see docs)
+#   ./scripts/demo.sh --sandbox    the same, but the bank is the real Investec sandbox behind the
+#                                  overlay proxy on :4200, which remembers what the sandbox accepts
+#                                  (needs INVESTEC_* in relayer/.env, see relayer/README.md)
 #   ./scripts/demo.sh --fresh      skip the seeded months: start at round 1 with nobody paid
 #
 # Ctrl-C stops everything. Logs are in .demo/. The relayer runs in a restart loop so the
@@ -46,7 +47,7 @@ run() { # name, command...
 }
 
 port_free() { ! (exec 3<>"/dev/tcp/127.0.0.1/$1") 2>/dev/null; }
-for p in 8545 4100 4000 3000; do
+for p in 8545 4100 4200 4000 3000; do
   if ! port_free "$p"; then
     echo "port $p is already in use. Stop whatever is on it (an old demo?) and run again."
     echo "  lsof -i :$p    or    fuser -k $p/tcp"
@@ -94,11 +95,20 @@ if [[ $SEED -eq 1 ]]; then
 fi
 
 # ---------------------------------------------------------------- bank and relayer
+BANK_PORT=4100
 if [[ $MODE == mock ]]; then
   step "starting the mock Investec server on :4100"
   run mock env MOCK_PORT=4100 MOCK_SEED_FILE="$ROOT/contracts/deployments/demo-ledger.jsonl" \
     RELAYER_WEBHOOK_URL=http://127.0.0.1:4000/webhook/transaction LOG_PRETTY=true \
     npm --prefix relayer run --silent mock
+else
+  BANK_PORT=4200
+  step "starting the sandbox overlay on :4200 (the real sandbox, remembered)"
+  run overlay env OVERLAY_PORT=4200 OVERLAY_FILE="$ROOT/.demo/sandbox-overlay.json" \
+    RELAYER_WEBHOOK_URL=http://127.0.0.1:4000/webhook/transaction LOG_PRETTY=true \
+    npm --prefix relayer run --silent overlay
+  for _ in $(seq 1 30); do curl -sf http://127.0.0.1:4200/health >/dev/null 2>&1 && break; sleep 0.5; done
+  curl -sf http://127.0.0.1:4200/health >/dev/null 2>&1 || { echo "the overlay did not come up, see .demo/overlay.log"; exit 1; }
 fi
 
 step "starting the relayer on :4000 (restart loop)"
@@ -106,7 +116,7 @@ run relayer bash -c "while true; do (cd relayer && env INVESTEC_MODE=$MODE RPC_U
 
 # ---------------------------------------------------------------- stage
 step "starting the stage app on :3000"
-run stage env CHAIN_ID=31337 NEXT_PUBLIC_RPC_URL=http://127.0.0.1:8545 RELAYER_URL=http://127.0.0.1:4000 MOCK_URL=http://127.0.0.1:4100 INVESTEC_MODE=$MODE DEMO_MODE=true \
+run stage env CHAIN_ID=31337 NEXT_PUBLIC_RPC_URL=http://127.0.0.1:8545 RELAYER_URL=http://127.0.0.1:4000 MOCK_URL=http://127.0.0.1:$BANK_PORT INVESTEC_MODE=$MODE DEMO_MODE=true \
   npm --prefix stage run --silent dev
 for _ in $(seq 1 60); do curl -sf http://127.0.0.1:3000/api/config >/dev/null 2>&1 && break; sleep 1; done
 
@@ -118,7 +128,7 @@ cat <<EOF
   presenter      http://localhost:3000/presenter   (keep this one off the projector)
 
   relayer        http://localhost:4000/health
-  mock bank      http://localhost:4100/__mock/state
+  bank           http://localhost:$BANK_PORT/__mock/state   ($MODE)
   logs           .demo/*.log
 
   Ctrl-C stops everything.

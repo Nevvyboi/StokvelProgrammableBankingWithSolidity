@@ -215,10 +215,12 @@ If you're on the audience page, that event has a hash. Tap it. That's the contra
 test network, telling you what just happened, without me in the way.
 
 One honest note, because this is a room that will ask. Investec's sandbox is stateless. A
-transfer in the sandbox returns a real payment reference and then nothing changes. So on stage
-the money moves in a mirror of the sandbox that speaks the same API, byte for byte, and every
-payout is also sent to the real sandbox, which answers with a real reference. You'll see one
-later. The relayer can't tell the difference, and that's the test.
+transfer in the sandbox returns a real payment reference and then nothing changes. So there's a
+small proxy between the relayer and the sandbox. Every call goes through to Investec untouched.
+When the sandbox says yes to a transfer, the proxy writes that down under Investec's own reference,
+and the next time anyone asks for the balance, it adds it in. The sandbox forgets, the proxy
+remembers, and it never writes a rand the sandbox didn't accept first. The relayer can't tell,
+and that's the test.
 
 ---
 
