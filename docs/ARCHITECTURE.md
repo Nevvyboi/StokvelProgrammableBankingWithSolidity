@@ -62,10 +62,18 @@ truth, "the relayer died" would be an outage. Because it reads events, it's a sh
 property is what makes the audience page honest: a phone in the room reads the same contract the
 projector does, through a block explorer neither of us controls.
 
-## What mock mode is, and isn't
+## The sandbox forgets, the overlay remembers
 
 Investec's sandbox is stateless: a transfer answers with a real payment reference and then nothing
-changes. `relayer/src/mock` is a stateful mirror of the sandbox's routes and response shapes, with
-a pool account, the treasurer's personal account and six saved beneficiaries. The relayer can't
-tell them apart, which is the test. `INVESTEC_SHADOW=sandbox` sends every payout to the real sandbox
-as well and logs its answer. Details and sources in [INVESTEC_API_NOTES.md](INVESTEC_API_NOTES.md).
+changes. Sandbox mode therefore runs through `relayer/src/overlay`, a transparent proxy on port
+4200. Every call goes to the sandbox unchanged. When the sandbox accepts a `transfermultiple` or
+`paymultiple`, the overlay writes one line keyed by the sandbox's `PaymentReferenceNumber`, and on
+every later read of a balance, a transaction list or the beneficiaries it folds those lines in after
+the sandbox's own rows. The relayer's poll cursor, the card code and the stage read the overlay and
+can't tell. The overlay never creates a reference, a row or a rand the sandbox didn't first accept;
+its file in `.demo/` is the memory, and `POST /__mock/reset` empties it.
+
+`relayer/src/mock` is the offline stand-in: a stateful mirror of the same routes and shapes with a
+pool account, the treasurer's account and six saved beneficiaries. With `MOCK_STATELESS=true` it
+forgets like the real sandbox, which is how the overlay is tested without network. Details and
+sources in [INVESTEC_API_NOTES.md](INVESTEC_API_NOTES.md).

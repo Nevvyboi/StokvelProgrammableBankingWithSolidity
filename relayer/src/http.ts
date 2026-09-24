@@ -118,8 +118,10 @@ export function createHttpApp(d: HttpDeps) {
     const { proposalId } = (await c.req.json()) as { proposalId: string };
     try {
       const hash = await contract.write.execute([BigInt(proposalId)]);
+      const receipt = await d.publicClient.waitForTransactionReceipt({ hash });
+      if (receipt.status !== "success") throw new Error(`execute reverted in ${hash}`);
       feed.push({ kind: "vote", title: "Proposal executed", detail: `#${proposalId}`, hash });
-      return c.json({ ok: true, hash });
+      return c.json({ ok: true, hash, block: receipt.blockNumber.toString() });
     } catch (err) {
       const text = errorText(err);
       return c.json({ ok: false, error: text }, 400);

@@ -74,9 +74,11 @@ export function loadConfig(overrides: Record<string, string> = {}): Config {
     stokvelV1 = stokvelV1 || d.stokvelV1;
   }
 
+  // sandbox mode goes through the overlay proxy by default (the stateful sandbox, src/overlay);
+  // set INVESTEC_BASE_URL to the sandbox itself to bypass it
   const investecBaseUrl =
     parsed.INVESTEC_BASE_URL ||
-    (parsed.INVESTEC_MODE === "sandbox" ? "https://openapisandbox.investec.com" : "http://127.0.0.1:4100");
+    (parsed.INVESTEC_MODE === "sandbox" ? "http://127.0.0.1:4200" : "http://127.0.0.1:4100");
 
   const members = (JSON.parse(readFileSync(parsed.MEMBERS_FILE, "utf8")).members as Member[]).sort(
     (a, b) => a.memberId - b.memberId,

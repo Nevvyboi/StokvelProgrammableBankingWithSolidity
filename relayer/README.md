@@ -37,14 +37,26 @@ and the stage app.
 backed by an in-memory ledger with the stokvel's pool account, the treasurer's personal account and
 six saved beneficiaries. It also runs the real `card/main.js` on `POST /__mock/swipe`.
 
-`INVESTEC_MODE=sandbox` talks to `https://openapisandbox.investec.com` with the public sandbox
-credentials. **The sandbox is stateless**: a transfer returns a real `PaymentReferenceNumber` and
-then nothing changes, so balances and transactions never move. The relayer runs against it (token,
-accounts, balance, transactions, beneficiaries, transfers) and `npm run smoke:sandbox` prints a
-report, but the money-moving demos need the mock. `INVESTEC_SHADOW=sandbox` in mock mode sends every
-payout to the real sandbox as well and logs its answer, which is how the talk shows a real Investec
-response on the same screen as the moving balance. Details in
-[`docs/INVESTEC_API_NOTES.md`](../docs/INVESTEC_API_NOTES.md).
+`INVESTEC_MODE=sandbox` talks to the real sandbox, `https://openapisandbox.investec.com`, with the
+public sandbox credentials. **The sandbox is stateless**: a transfer returns a real
+`PaymentReferenceNumber` and then nothing changes. So sandbox mode goes through `src/overlay`, the
+sandbox overlay (`npm run overlay`, port 4200): a transparent proxy that forwards every call to the
+sandbox unchanged and keeps one line per transfer the sandbox accepted, keyed by the sandbox's own
+`PaymentReferenceNumber`. On the way back it folds those lines into the sandbox's balance,
+transaction and beneficiary responses. Nothing is invented: a line exists only because the sandbox
+said yes, the reference on the row is the sandbox's, and the sandbox's own rows come first and
+untouched. The relayer and the card code point at the overlay and can't tell.
+
+The presenter stories (`/__mock/credit`, `steal`, `refund`, `swipe`, `double-webhook`) exist on the
+overlay too, and each one is a real sandbox transfer between the two sandbox accounts that play the
+pool and the treasurer (`POOL_ACCOUNT_ID`, `TREASURER_ACCOUNT_ID`, default: the first two accounts
+the sandbox lists). The overlay's file, `.demo/sandbox-overlay.json`, survives a restart, and
+`POST /__mock/reset` empties it. `npm run smoke:sandbox` still prints a report straight from the
+sandbox, and `INVESTEC_BASE_URL=https://openapisandbox.investec.com` bypasses the overlay.
+
+Two things the owner has to do before a sandbox run: put real sandbox `beneficiaryId`s in
+`MEMBERS_FILE` (the smoke report prints them; `members.example.json` carries the mock's) and deploy
+with matching `beneficiaryHash`es. Details in [`docs/INVESTEC_API_NOTES.md`](../docs/INVESTEC_API_NOTES.md).
 
 ## Presenter routes
 
@@ -57,7 +69,7 @@ response on the same screen as the moving balance. Details in
 | `GET /feed`, `GET /feed/stream` | the relayer's diary, for the dashboard's event feed |
 | `GET /health` | mode, addresses, last poll |
 
-Mock bank routes, on port 4100 under `/__mock`: `swipe`, `credit`, `steal`, `refund`,
+Bank routes, on port 4100 (mock) or 4200 (overlay) under `/__mock`: `swipe`, `credit`, `steal`, `refund`,
 `double-webhook`, `seed`, `reset`, `state`.
 
 ## Tests

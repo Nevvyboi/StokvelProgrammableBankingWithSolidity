@@ -19,6 +19,8 @@ export type MockOptions = {
   fetchImpl?: typeof fetch;
   /** the URL card code should call, normally this server's own address */
   selfUrl: string;
+  /** behave like the real sandbox: accept transfers, return references, change nothing */
+  stateless?: boolean;
 };
 
 const TOKEN = "mock-access-token";
@@ -82,9 +84,7 @@ export function createMockApp(o: MockOptions) {
       envelope(
         c,
         respond(
-          body.transferList.map((t) =>
-            ledger.transfer(from, t.beneficiaryAccountId, randsToCents(t.amount), t.myReference, t.theirReference),
-          ),
+          body.transferList.map((t) => move(from, t.beneficiaryAccountId, randsToCents(t.amount), t.myReference, t.theirReference)),
           body.transferList.map((t) => [t.theirReference, t.beneficiaryAccountId] as const),
         ),
       ),
@@ -98,15 +98,20 @@ export function createMockApp(o: MockOptions) {
       envelope(
         c,
         respond(
-          body.paymentList.map((p) =>
-            ledger.transfer(from, p.beneficiaryId, randsToCents(p.amount), p.myReference, p.theirReference),
-          ),
+          body.paymentList.map((p) => move(from, p.beneficiaryId, randsToCents(p.amount), p.myReference, p.theirReference)),
           body.paymentList.map((p) => [p.theirReference, p.beneficiaryId] as const),
         ),
       ),
     );
   });
   app.route("/", authed);
+
+  // stateless mode is the real sandbox's behaviour: a reference comes back and nothing moves
+  let statelessCounter = 0;
+  function move(from: string, to: string, cents: bigint, myReference: string, theirReference: string) {
+    if (o.stateless) return { paymentReference: `UBP${String(++statelessCounter + 7000).padStart(10, "0")}` };
+    return ledger.transfer(from, to, cents, myReference, theirReference);
+  }
 
   function respond(
     results: Array<{ paymentReference: string }>,

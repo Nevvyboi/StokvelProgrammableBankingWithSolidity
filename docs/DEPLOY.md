@@ -87,11 +87,14 @@ any: their signatures are carried by the relayer.
 
 ## The Investec sandbox
 
-The relayer runs against `https://openapisandbox.investec.com` with `INVESTEC_MODE=sandbox` and the
-public sandbox credentials in `relayer/.env`. The sandbox is stateless, so the money-moving demos
-use the mock. `INVESTEC_SHADOW=sandbox` sends every payout to the real sandbox as well and logs its
-answer next to the mock's. `npm run smoke:sandbox` prints a report; paste it into
-[INVESTEC_API_NOTES.md](INVESTEC_API_NOTES.md).
+`./scripts/demo.sh --sandbox` runs the relayer with `INVESTEC_MODE=sandbox` and the public sandbox
+credentials in `relayer/.env`, through the sandbox overlay on :4200 (`relayer/src/overlay`). The
+sandbox is stateless; the overlay forwards every call and remembers each transfer the sandbox
+accepts, under the sandbox's own reference, so balances and transactions move on stage. Before the
+run: `npm run smoke:sandbox` prints the sandbox's accounts and beneficiary ids; put those ids in
+`MEMBERS_FILE`, deploy with matching `beneficiaryHash`es, and set `POOL_ACCOUNT_ID` and
+`TREASURER_ACCOUNT_ID` if the first two sandbox accounts are not the ones you want. Paste the smoke
+report into [INVESTEC_API_NOTES.md](INVESTEC_API_NOTES.md).
 
 ## Card code
 
