@@ -45,7 +45,7 @@ docker inspect -f '{{.State.Running}}' "$NGINX_CTR" 2>/dev/null | grep -q true |
 BIND=$(docker network inspect "$DOCKER_NET" -f '{{range .IPAM.Config}}{{.Gateway}}{{end}}')
 [[ $BIND =~ ^[0-9.]+$ ]] || die "no gateway address for $DOCKER_NET"
 echo "  services will listen on $BIND (reachable by nginx, not by the internet)"
-for p in 3000 4000 4100 4200; do
+for p in 3000 4000 4100 4200 8545; do
   if ss -ltnp "sport = :$p" | grep -q LISTEN && ! ss -ltnp "sport = :$p" | grep -qE 'node|next'; then die "port $p is taken by something else"; fi
 done
 
@@ -97,13 +97,17 @@ if [[ ! -f $ETC/stokvel.env ]]; then
 EOF
   exit 0
 fi
+chain_id=$(grep -E '^CHAIN_ID=' "$ETC/stokvel.env" | cut -d= -f2)
+# 31337: the talk's own Anvil on this server (stokvel-anvil). The relayer uses Anvil's funded
+# accounts, so its keys may stay empty, and arm.sh deploys, so there's no deployments file yet
+anvil=0; [[ $chain_id == 31337 ]] && anvil=1
+required=(RPC_URL SPARE_ADDRESS); [[ $anvil -eq 1 ]] || required+=(RELAYER_PK ATTESTOR_PK)
 missing=()
-for v in RPC_URL RELAYER_PK ATTESTOR_PK SPARE_ADDRESS; do grep -qE "^$v=.+" "$ETC/stokvel.env" || missing+=("$v"); done
+for v in "${required[@]}"; do grep -qE "^$v=.+" "$ETC/stokvel.env" || missing+=("$v"); done
 grep -q "YOUR_KEY" "$ETC/stokvel.env" && missing+=("RPC_URL still has YOUR_KEY")
 [[ ${#missing[@]} -eq 0 ]] || die "not filled in yet in $ETC/stokvel.env: ${missing[*]}"
 chmod 600 "$ETC/stokvel.env"; chown root:root "$ETC/stokvel.env"
-chain_id=$(grep -E '^CHAIN_ID=' "$ETC/stokvel.env" | cut -d= -f2)
-if [[ ! -f $APP/contracts/deployments/${chain_id:-84532}.json ]] && ! grep -qE '^STOKVEL_ADDRESS=0x' "$ETC/stokvel.env"; then
+if [[ $anvil -eq 0 && ! -f $APP/contracts/deployments/${chain_id:-84532}.json ]] && ! grep -qE '^STOKVEL_ADDRESS=0x' "$ETC/stokvel.env"; then
   die "contracts/deployments/${chain_id:-84532}.json is not in the repo and STOKVEL_ADDRESS is empty. Deploy and commit it first."
 fi
 sandbox=0; grep -qE '^INVESTEC_MODE=sandbox' "$ETC/stokvel.env" && sandbox=1
@@ -123,9 +127,17 @@ build="export NODE_OPTIONS=--max-old-space-size=1536 NEXT_TELEMETRY_DISABLED=1
 runuser -u stokvel -- env HOME="$APP" nice -n 15 ionice -c3 bash -c "$build"
 cleanup_swap; made_swap=0
 
+if [[ $anvil -eq 1 && ! -x $APP/.foundry/bin/anvil ]]; then
+  step "Foundry's anvil, inside $APP (gone with it at teardown)"
+  runuser -u stokvel -- env HOME="$APP" FOUNDRY_DIR="$APP/.foundry" bash -c \
+    "curl -fsSL https://foundry.paradigm.xyz | bash >/dev/null 2>&1; $APP/.foundry/bin/foundryup >/dev/null 2>&1"
+  [[ -x $APP/.foundry/bin/anvil ]] || die "Foundry did not install into $APP/.foundry"
+fi
+
 # ---------------------------------------------------------------- services, on the Docker gateway
 step "services: stage, relayer, $([[ $sandbox -eq 1 ]] && echo 'sandbox overlay' || echo 'mock bank')"
 install -m 644 "$APP"/deploy/systemd/stokvel-*.service /etc/systemd/system/
+[[ $anvil -eq 1 ]] && install -m 644 "$HERE/stokvel-anvil.service" /etc/systemd/system/
 dropin() { install -d "/etc/systemd/system/$1.service.d"; cat > "/etc/systemd/system/$1.service.d/netcup.conf"; }
 # the units bind to 127.0.0.1 for Caddy; here nginx lives in a container, so they bind to the
 # host's address on its network instead, and find each other there
@@ -141,7 +153,7 @@ EOF
 dropin stokvel-relayer <<EOF
 # deploy/netcup: listen where the nginx container can reach it, and find the bank there
 [Unit]
-After=docker.service
+After=docker.service stokvel-anvil.service
 [Service]
 Environment=BIND_HOST=$BIND INVESTEC_BASE_URL=http://$BIND:$bank_port
 EOF
@@ -161,10 +173,23 @@ if [[ $sandbox -eq 1 ]]; then
 else
   services+=(stokvel-mock); systemctl disable --now stokvel-overlay >/dev/null 2>&1 || true
 fi
+armed=1
+if [[ $anvil -eq 1 ]]; then
+  # the chain only starts here; restarting it would be harmless (it reloads its state file) but
+  # there's no need. Without a deployment the relayer has nothing to watch: arm.sh starts it
+  systemctl enable --quiet --now stokvel-anvil
+  [[ -f $APP/contracts/deployments/31337.json ]] || armed=0
+fi
 systemctl enable --quiet "${services[@]}"
-systemctl restart "${services[@]}"
-for i in $(seq 1 30); do curl -sf -o /dev/null "http://$BIND:4000/health" && curl -sf -o /dev/null "http://$BIND:3000/" && break; sleep 2; done
-for s in "${services[@]}"; do printf '  %-18s %s\n' "$s" "$(systemctl is-active "$s")"; done
+if [[ $armed -eq 1 ]]; then
+  systemctl restart "${services[@]}"
+else
+  systemctl stop stokvel-relayer stokvel-mock stokvel-overlay 2>/dev/null || true
+  systemctl restart stokvel-stage
+  echo "  no contract on the chain yet: from your laptop, run ./deploy/netcup/arm.sh"
+fi
+for i in $(seq 1 30); do { [[ $armed -eq 0 ]] || curl -sf -o /dev/null "http://$BIND:4000/health"; } && curl -sf -o /dev/null "http://$BIND:3000/" && break; sleep 2; done
+for s in $([[ $anvil -eq 1 ]] && echo stokvel-anvil) "${services[@]}"; do printf '  %-18s %s\n' "$s" "$(systemctl is-active "$s")"; done
 curl -sf -o /dev/null "http://$BIND:3000/" || die "the stage app does not answer on $BIND:3000 (journalctl -u stokvel-stage -n 50)"
 
 if [[ $nginx_on -eq 0 ]]; then
