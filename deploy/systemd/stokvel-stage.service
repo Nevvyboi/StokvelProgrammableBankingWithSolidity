@@ -1,0 +1,26 @@
+# The screens: projector, /sign, /watch, /presenter. Reachable only through Caddy.
+[Unit]
+Description=Stokvel stage app (Next.js)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=stokvel
+Group=stokvel
+WorkingDirectory=/opt/stokvel/stage
+EnvironmentFile=/etc/stokvel/stokvel.env
+# browsers read the chain through the read-only proxy and reach the relayer and the mock bank
+# through Caddy's paths; the card-keys route is off on a public server
+Environment=NODE_ENV=production PUBLIC_RPC_URL=/api/rpc RELAYER_URL=/relayer MOCK_URL=/mock DEMO_MODE=false NEXT_TELEMETRY_DISABLED=1
+ExecStart=/opt/stokvel/stage/node_modules/.bin/next start -H 127.0.0.1 -p 3000
+Restart=always
+RestartSec=2
+
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/opt/stokvel/stage/.next
+
+[Install]
+WantedBy=multi-user.target

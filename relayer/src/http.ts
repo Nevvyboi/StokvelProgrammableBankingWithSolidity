@@ -145,7 +145,11 @@ export function createHttpApp(d: HttpDeps) {
   // ---------------------------------------------------------- presenter admin
   const admin = new Hono();
   admin.post("/tick", async (c) => {
-    const [r, p] = await Promise.all([d.reservesTick(), d.payoutsTick()]);
+    // attest first, then try to close: after "skip to month end" the last attestation is a month
+    // old, and closing against it is refused as ReservesStale, which says nothing on the screen.
+    // In order, DEMO 4's close is refused as ReservesShort at once and FROZEN lands on the button
+    const r = await d.reservesTick();
+    const p = await d.payoutsTick();
     return c.json(safe({ reserves: r, payouts: p }));
   });
   admin.post("/poll", async (c) => c.json(safe(await d.contributions.poll())));

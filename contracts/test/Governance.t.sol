@@ -207,23 +207,23 @@ contract GovernanceTest is Fixture {
     function test_rotateKey_fullStory() public {
         // Sipho's card (member 05, memberId 5) is stolen. The thief holds the key.
         uint256 thiefPk = memberPk[5];
-        uint256 spare04bPk = uint256(keccak256("spare 04b"));
-        address spare04b = vm.addr(spare04bPk);
+        uint256 spare06bPk = uint256(keccak256("spare 06b"));
+        address spare06b = vm.addr(spare06bPk);
 
         vm.prank(memberKey[0]);
-        uint256 recover = s.propose(IStokvel.Kind.RotateKey, 0, 5, spare04b);
+        uint256 recover = s.propose(IStokvel.Kind.RotateKey, 0, 5, spare06b);
         for (uint256 i; i < 4; ++i) {
             vote(recover, i);
         }
         vm.warp(block.timestamp + TIMELOCK);
         vm.expectEmit(true, true, true, true);
-        emit IStokvel.KeyRotated(5, memberKey[5], spare04b);
+        emit IStokvel.KeyRotated(5, memberKey[5], spare06b);
         s.execute(recover);
 
         assertEq(s.idOf(memberKey[5]), 0);
-        assertEq(s.idOf(spare04b), 6);
+        assertEq(s.idOf(spare06b), 6);
         (address key,,) = s.members(5);
-        assertEq(key, spare04b);
+        assertEq(key, spare06b);
 
         // a new proposal: the thief tries to vote with the stolen card
         vm.prank(memberKey[0]);
@@ -232,7 +232,7 @@ contract GovernanceTest is Fixture {
         s.voteBySig(next, 0, signVote(address(s), thiefPk, next, 0));
 
         // the spare card votes as Sipho
-        s.voteBySig(next, 0, signVote(address(s), spare04bPk, next, 0));
+        s.voteBySig(next, 0, signVote(address(s), spare06bPk, next, 0));
         assertTrue(s.hasVoted(next, 5));
     }
 

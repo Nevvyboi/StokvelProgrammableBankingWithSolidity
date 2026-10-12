@@ -4,6 +4,7 @@ import type { FeedItem } from "@/lib/useStage";
 import type { StageConfig } from "@/lib/config";
 import { explorerTx } from "@/lib/config";
 import { short } from "@/lib/members";
+import { minuteBook } from "@/lib/minuteBook";
 
 const WHERE: Record<FeedItem["kind"], string> = {
   "bank->chain": "bank → chain",
@@ -16,7 +17,7 @@ const WHERE: Record<FeedItem["kind"], string> = {
 
 /** The minute book: one line per message, time on the left, hash on the right. */
 export function FeedPanel({ feed, cfg, rows = 5, big = true }: { feed: FeedItem[]; cfg: StageConfig | null; rows?: number; big?: boolean }) {
-  const items = [...feed].reverse().slice(0, rows);
+  const items = minuteBook(feed).reverse().slice(0, rows);
   return (
     <table className={`ledger ${big ? "text-[1.25rem]" : "text-sm"}`}>
       <tbody>

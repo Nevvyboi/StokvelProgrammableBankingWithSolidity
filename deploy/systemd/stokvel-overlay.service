@@ -1,0 +1,25 @@
+# Only for INVESTEC_MODE=sandbox: the proxy in front of the stateless Investec sandbox that
+# remembers each transfer it accepted (relayer/src/overlay). Not enabled by setup.sh.
+[Unit]
+Description=Stokvel Investec sandbox overlay
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=stokvel
+Group=stokvel
+WorkingDirectory=/opt/stokvel/relayer
+EnvironmentFile=/etc/stokvel/stokvel.env
+Environment=NODE_ENV=production BIND_HOST=127.0.0.1 OVERLAY_PORT=4200 OVERLAY_FILE=/var/lib/stokvel/sandbox-overlay.json
+ExecStart=/opt/stokvel/relayer/node_modules/.bin/tsx src/overlay/index.ts
+Restart=always
+RestartSec=2
+StateDirectory=stokvel
+
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

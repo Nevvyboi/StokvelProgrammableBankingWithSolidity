@@ -201,8 +201,8 @@ describe.skipIf(!run)("relayer end to end", () => {
     expect(await contract.read.contributionCents()).toBe(600_000n);
   });
 
-  it("DEMO 8: Sipho's card is stolen; after RotateKey the thief is rejected and card 04b votes", async () => {
-    const spare = privateKeyToAccount(keccak256(toBytes("spare card 04b")));
+  it("DEMO 8: Sipho's card is stolen; after RotateKey the thief is rejected and card 06b votes", async () => {
+    const spare = privateKeyToAccount(keccak256(toBytes("spare card 06b")));
     const p = await post(relayerApp, "http://relayer/propose", { kind: 1, memberId: 5, newAddr: spare.address });
     const id = p.proposalId as string;
     const domain = eip712Domain(31337, cfg.stokvel);

@@ -84,7 +84,8 @@ if [[ $SEED -eq 1 ]]; then
   step "seeding two settled months and a mid-month round"
   warp() { cast rpc --rpc-url http://127.0.0.1:8545 evm_increaseTime "$1" >/dev/null; cast rpc --rpc-url http://127.0.0.1:8545 evm_mine >/dev/null; }
   fs() { (cd contracts && MEMBERS_FILE="${MEMBERS_FILE_ARG}" MEMBERS_KEYS_FILE="${MEMBERS_FILE_ARG}" forge script script/DemoState.s.sol --rpc-url http://127.0.0.1:8545 --broadcast "$@" 2>&1 | grep -E "^  [a-z]|Error|revert" || true); }
-  fs --sig "join()"
+  # nobody signs the constitution here: DEMO 1 is the six volunteers doing it on stage, and
+  # contributions and payouts do not need it, so the seeded months work without it
   fs --sig "month(uint256)" 0
   warp 2592000
   fs --sig "closeAndSettle()"
@@ -116,7 +117,9 @@ run relayer bash -c "while true; do (cd relayer && env INVESTEC_MODE=$MODE RPC_U
 
 # ---------------------------------------------------------------- stage
 step "starting the stage app on :3000"
-run stage env CHAIN_ID=31337 NEXT_PUBLIC_RPC_URL=http://127.0.0.1:8545 RELAYER_URL=http://127.0.0.1:4000 MOCK_URL=http://127.0.0.1:$BANK_PORT INVESTEC_MODE=$MODE DEMO_MODE=true \
+# a fresh token every run: /api/keys hands the card keys only to the presenter URL printed below
+PRESENTER_TOKEN=$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')
+run stage env CHAIN_ID=31337 NEXT_PUBLIC_RPC_URL=http://127.0.0.1:8545 RELAYER_URL=http://127.0.0.1:4000 MOCK_URL=http://127.0.0.1:$BANK_PORT INVESTEC_MODE=$MODE DEMO_MODE=true PRESENTER_TOKEN=$PRESENTER_TOKEN \
   npm --prefix stage run --silent dev
 for _ in $(seq 1 60); do curl -sf http://127.0.0.1:3000/api/config >/dev/null 2>&1 && break; sleep 1; done
 
@@ -125,7 +128,8 @@ cat <<EOF
   projector      http://localhost:3000/
   signing        http://localhost:3000/sign
   audience       http://localhost:3000/watch
-  presenter      http://localhost:3000/presenter   (keep this one off the projector)
+  presenter      http://localhost:3000/presenter#k=$PRESENTER_TOKEN
+                 (keep this one off the projector; the token is new every run)
 
   relayer        http://localhost:4000/health
   bank           http://localhost:$BANK_PORT/__mock/state   ($MODE)

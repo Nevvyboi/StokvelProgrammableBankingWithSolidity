@@ -48,7 +48,9 @@ export type ProposalState = {
 export const KIND_NAMES = ["Set contribution", "Rotate key", "Replace relayer", "Replace attestor"];
 
 export function publicClientFor(cfg: StageConfig): PublicClient {
-  return createPublicClient({ transport: http(cfg.rpcUrl, { batch: true }) });
+  // a path like /api/rpc means this site's own read-only proxy (deploy/README.md)
+  const url = cfg.rpcUrl.startsWith("/") && typeof window !== "undefined" ? new URL(cfg.rpcUrl, window.location.origin).toString() : cfg.rpcUrl;
+  return createPublicClient({ transport: http(url, { batch: true }) });
 }
 
 /** Everything the dashboard shows, read straight from the contract. No database. */

@@ -47,7 +47,9 @@ docs.base.org under "network faucets". A few hundredths of an ETH is plenty for 
    The script writes `contracts/deployments/84532.json`. Commit it: the stage app and the relayer
    read it, and the audience page links to it.
 
-4. Sign the constitution before the night, or on stage in DEMO 1 (that is the point of DEMO 1):
+4. Leave the constitution unsigned: the six volunteers sign it on stage in DEMO 1, and a member
+   who has already joined sees "Nothing to sign" at the station. Only for a rehearsal without
+   volunteers:
 
    ```bash
    MEMBERS_KEYS_FILE=../cards/out/members.json RELAYER_PK=0x... \

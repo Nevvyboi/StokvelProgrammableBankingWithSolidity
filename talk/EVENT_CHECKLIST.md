@@ -17,7 +17,7 @@
 ## Printing (order two weeks ahead)
 
 - [ ] `cards/out/cards.pdf` printed at a real print shop: 85.6 x 54 mm, 350 gsm, matt laminate,
-      rounded corners, cut on the crop marks. Nine cards: 01 to 06, 04b, 07, T
+      rounded corners, cut on the crop marks. Nine cards: 01 to 06, 06b, 07, T
 - [ ] Proof one card before the run: the QR must scan from 20 cm with the phone camera
 - [ ] A second set printed from a second `generate.py` run, kept sealed, in case a card is lost
       before the night (a lost card means a different deployment, so keep the two sets apart)

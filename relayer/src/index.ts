@@ -129,7 +129,8 @@ async function main() {
     investec,
     accountId: account.accountId,
   });
-  serve({ fetch: app.fetch, port: cfg.PORT, hostname: "0.0.0.0" }, () => log.info({ port: cfg.PORT }, "relayer listening"));
+  // BIND_HOST=127.0.0.1 on a public server, so only Caddy can reach it (deploy/README.md)
+  serve({ fetch: app.fetch, port: cfg.PORT, hostname: process.env.BIND_HOST ?? "0.0.0.0" }, () => log.info({ port: cfg.PORT }, "relayer listening"));
 }
 
 main().catch((err) => {

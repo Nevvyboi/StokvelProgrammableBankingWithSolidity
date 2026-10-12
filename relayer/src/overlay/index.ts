@@ -27,4 +27,5 @@ const app = createOverlayApp({
   selfUrl: `http://127.0.0.1:${port}`,
   cardDir: resolve(process.cwd(), "..", "card"),
 });
-serve({ fetch: app.fetch, port, hostname: "0.0.0.0" }, () => log.info({ port, sandbox: process.env.SANDBOX_URL ?? SANDBOX_URL, recorded: store.snapshot().refs.length }, "sandbox overlay is up"));
+// BIND_HOST=127.0.0.1 on a public server, so only Caddy can reach it (deploy/README.md)
+serve({ fetch: app.fetch, port, hostname: process.env.BIND_HOST ?? "0.0.0.0" }, () => log.info({ port, sandbox: process.env.SANDBOX_URL ?? SANDBOX_URL, recorded: store.snapshot().refs.length }, "sandbox overlay is up"));

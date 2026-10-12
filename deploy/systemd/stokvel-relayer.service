@@ -1,0 +1,26 @@
+# The messenger between the bank and the chain. DEMO 9 ("stop the relayer") exits the process on
+# purpose; Restart=always brings it back three seconds later, the same as demo.sh's restart loop.
+[Unit]
+Description=Stokvel relayer
+After=network-online.target stokvel-mock.service
+Wants=network-online.target
+
+[Service]
+User=stokvel
+Group=stokvel
+WorkingDirectory=/opt/stokvel/relayer
+EnvironmentFile=/etc/stokvel/stokvel.env
+# DEMO_MODE=true keeps the 20 second attestations the talk is timed around and the presenter's
+# admin routes, which Caddy puts behind the presenter password
+Environment=NODE_ENV=production BIND_HOST=127.0.0.1 PORT=4000 DEMO_MODE=true
+ExecStart=/opt/stokvel/relayer/node_modules/.bin/tsx src/index.ts
+Restart=always
+RestartSec=3
+
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target
