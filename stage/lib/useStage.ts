@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { PublicClient } from "viem";
 import { loadStageConfig, type StageConfig } from "./config";
 import { publicClientFor, readEvents, readState, recentBlocks, type BlockInfo, type ChainState, type StokvelEvent } from "./chain";
+import { raisesAlarm } from "./minuteBook";
 
 export type FeedItem = {
   seq: number;
@@ -138,7 +139,7 @@ export function useStage(opts: { poll?: number; fallback?: boolean } = {}): Stag
           lastSeq.current = f[f.length - 1]!.seq;
           setFeed((old) => [...old, ...f].slice(-120));
           // only a fresh refusal raises the alarm; a reload must not replay an old one
-          const bad = [...f].reverse().find((i) => i.error && i.at > Date.now() - 20_000);
+          const bad = [...f].reverse().find((i) => raisesAlarm(i) && i.at > Date.now() - 20_000);
           if (bad) {
             const kind: Alarm["kind"] = bad.error!.startsWith("ReservesShort") ? "ReservesShort" : bad.error!.startsWith("AlreadyRecorded") ? "AlreadyRecorded" : "Refused";
             setAlarm({ kind, title: bad.title, detail: bad.error!, at: Date.now() });
