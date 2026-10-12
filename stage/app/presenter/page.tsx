@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { toHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { useStage } from "@/lib/useStage";
+import { loadStageConfig } from "@/lib/config";
 import { MEMBERS, formatRands } from "@/lib/members";
 import { anvilMember, nonceOf, relayerPost, signJoin, signVote } from "@/lib/signing";
 import type { ProposalState } from "@/lib/chain";
@@ -35,20 +36,32 @@ export default function Presenter() {
       setFallback(localStorage.getItem("stokvel:fallback") === "1");
     } catch {}
     fetch("/fallback/script.json").then((r) => r.json()).then(setScript).catch(() => {});
-    fetch("/api/keys")
+    // scripts/demo.sh prints this page's URL with #k=<token>; the fragment never reaches a server log
+    let token = "";
+    try {
+      const m = window.location.hash.match(/k=([0-9a-f]+)/);
+      if (m) sessionStorage.setItem("stokvel:presenter-token", m[1]!);
+      token = sessionStorage.getItem("stokvel:presenter-token") ?? "";
+    } catch {}
+    fetch("/api/keys", { headers: { "x-presenter-token": token } })
       .then((r) => r.json())
-      .then((d) => {
+      .then(async (d) => {
         if (d.keys) {
           setKeys(d.keys.map((k: { label: string; name: string; privateKey: `0x${string}`; memberId?: number }) => ({ ...k, address: privateKeyToAccount(k.privateKey).address })));
           say("loaded member keys from cards/out/keys.json");
+        } else if ((await loadStageConfig()).chainId !== 31337) {
+          // Anvil's test keys are not members on a public chain: a "signs" button would only put a
+          // REFUSED stamp on the projector. On a public server the members sign with their cards
+          setKeys([]);
+          say("card keys are not served here: members sign with their cards at /sign");
         } else {
           const pk = (i: number) => toHex(anvilMember(i).getHdKey().privateKey!);
           setKeys([
             ...MEMBERS.map((m) => ({ label: m.number, name: m.name, privateKey: pk(m.memberId), address: anvilMember(m.memberId).address, memberId: m.memberId })),
-            { label: "04b", name: "spare 04b", privateKey: pk(6), address: anvilMember(6).address },
+            { label: "06b", name: "spare 06b", privateKey: pk(6), address: anvilMember(6).address },
             { label: "07", name: "spare 07", privateKey: pk(7), address: anvilMember(7).address },
           ]);
-          say("no cards/out/keys.json, using Anvil's public test keys as the members");
+          say(d.error ? "card keys not served here (open the presenter URL demo.sh printed), using Anvil's public test keys" : "no cards/out/keys.json, using Anvil's public test keys as the members");
         }
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -93,7 +106,7 @@ export default function Presenter() {
   const open: ProposalState[] = (s.state?.proposals ?? []).filter((p) => !p.executed);
   const latest = open[open.length - 1];
   const unpaid = (s.state?.members ?? []).filter((m) => m.paidThisRound < (s.state?.contributionCents ?? 0n));
-  const spare = keys.find((k) => k.label === "04b");
+  const spare = keys.find((k) => k.label === "06b");
 
   const toggleFallback = () => {
     const next = !fallback;
@@ -211,10 +224,10 @@ export default function Presenter() {
           )}
         </Step>
 
-        <Step n="DEMO 8" title="Stolen card: move Sipho to card 04b">
-          <Btn tone="border-primary text-primary" onClick={() => spare && relayer("/propose", { kind: 1, memberId: 5, newAddr: spare.address })}>Propose RotateKey 06 to 04b</Btn>
+        <Step n="DEMO 8" title="Stolen card: move Sipho to card 06b">
+          <Btn tone="border-primary text-primary" onClick={() => { const to = spare?.address ?? cfg?.spareAddress; if (to) relayer("/propose", { kind: 1, memberId: 5, newAddr: to }); else say("no card 06b: set SPARE_ADDRESS on the server"); }}>Propose RotateKey 06 to 06b</Btn>
           {keys.find((k) => k.label === "06") && <Btn tone="border-danger text-danger" onClick={() => latest && signAs(keys.find((k) => k.label === "06")!, { proposalId: latest.id })}>Thief votes with the stolen 06 card</Btn>}
-          {spare && <Btn onClick={() => latest && signAs(spare, { proposalId: latest.id })}>04b votes as Sipho</Btn>}
+          {spare && <Btn onClick={() => latest && signAs(spare, { proposalId: latest.id })}>06b votes as Sipho</Btn>}
         </Step>
 
         <Step n="DEMO 9" title="Kill the server">

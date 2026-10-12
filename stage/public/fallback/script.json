@@ -138,13 +138,13 @@
     }
   },
   {
-    "title": "DEMO 8: Sipho's card is stolen, 04b takes over",
+    "title": "DEMO 8: Sipho's card is stolen, 06b takes over",
     "payload": {
       "feed": [
-        { "seq": 1020, "at": 0, "kind": "vote", "title": "Proposal opened", "detail": "#1 move Sipho to card 04b" },
-        { "seq": 1021, "at": 0, "kind": "vote", "title": "Proposal executed", "detail": "KeyRotated: 06 Sipho now signs with 04b" },
+        { "seq": 1020, "at": 0, "kind": "vote", "title": "Proposal opened", "detail": "#1 move Sipho to card 06b" },
+        { "seq": 1021, "at": 0, "kind": "vote", "title": "Proposal executed", "detail": "KeyRotated: 06 Sipho now signs with 06b" },
         { "seq": 1022, "at": 0, "kind": "refused", "title": "Vote refused", "detail": "the stolen card", "error": "NotMember(0x23618e…1E8f)" },
-        { "seq": 1023, "at": 0, "kind": "vote", "title": "Vote counted", "detail": "Sipho, with card 04b" }
+        { "seq": 1023, "at": 0, "kind": "vote", "title": "Vote counted", "detail": "Sipho, with card 06b" }
       ],
       "alarm": { "kind": "Refused", "title": "Vote refused", "detail": "NotMember(0x23618e…1E8f)" }
     }

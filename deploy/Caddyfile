@@ -1,0 +1,44 @@
+# The one door into the server. Caddy gets the HTTPS certificate on its own and decides, path by
+# path, what the public may reach. The stage app, the relayer and the mock bank listen on
+# 127.0.0.1 only, so this file is the whole of the public surface. deploy/README.md explains it.
+#
+# The values in {$...} come from /etc/stokvel/caddy.env (see caddy.env.example).
+
+{
+	email {$ACME_EMAIL}
+}
+
+{$STOKVEL_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		-Server
+	}
+
+	# Everything only the presenter may touch: the run sheet, the relayer's admin and proposal
+	# routes, the mock bank's levers (steal, swipe, refund) and the card keys. Password protected.
+	# The few relayer routes the public pages need are carved out:
+	#   GET  feed, bank, health, nonce   what the projector, the phones and /sign read
+	#   POST join, votes                 a member's signature; the contract checks it, not us
+	@private {
+		path /presenter /presenter/* /relayer/* /mock/* /api/keys
+		not path /relayer/feed /relayer/bank /relayer/health /relayer/nonce/* /relayer/join /relayer/votes
+	}
+	basic_auth @private {
+		{$PRESENTER_USER} {$PRESENTER_HASH}
+	}
+
+	handle_path /relayer/* {
+		reverse_proxy 127.0.0.1:4000
+	}
+	handle_path /mock/* {
+		reverse_proxy 127.0.0.1:4100
+	}
+	# the stage app: the projector (/), /sign, /watch, /presenter and its read-only chain proxy (/api/rpc)
+	handle {
+		reverse_proxy 127.0.0.1:3000
+	}
+}

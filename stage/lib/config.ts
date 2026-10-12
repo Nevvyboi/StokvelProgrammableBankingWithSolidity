@@ -10,6 +10,8 @@ export type StageConfig = {
   contributionCents: string;
   timelock: number;
   mode: "mock" | "sandbox";
+  /** card 06b's address, for DEMO 8's proposal where the card keys are not served (a public server) */
+  spareAddress: `0x${string}` | null;
 };
 
 let cached: Promise<StageConfig> | null = null;

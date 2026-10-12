@@ -441,9 +441,9 @@ everything.
 
 Here, the committee can move Sipho's membership to a new card. Not the thief, the members.
 
-`Presenter: DEMO 8, "Propose RotateKey 06 to 04b".`
+`Presenter: DEMO 8, "Propose RotateKey 06 to 06b".`
 
-*Hand Sipho the spare card, 04b.*
+*Hand Sipho the spare card, 06b.*
 
 Four signatures again. Same as before.
 
@@ -461,7 +461,7 @@ Now, the thief. That's me, with the old card.
 ever cast still counts, because votes are counted per member, not per card. But it will never
 sign as Sipho again.
 
-*Sipho scans 04b.*
+*Sipho scans 06b.*
 
 And Sipho, with the new card, is Sipho.
 

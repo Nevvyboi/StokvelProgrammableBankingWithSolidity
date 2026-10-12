@@ -41,6 +41,7 @@ them and can't make decisions. The contract never holds funds.**
 | [`talk/`](talk/) | **The words.** [`SPEECH.md`](talk/SPEECH.md) timed slide by slide, [`REHEARSAL.md`](talk/REHEARSAL.md), [`FALLBACK.md`](talk/FALLBACK.md), [`ABSTRACT.md`](talk/ABSTRACT.md), [`EVENT_CHECKLIST.md`](talk/EVENT_CHECKLIST.md) |
 | [`docs/`](docs/) | [`ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`INVESTEC_API_NOTES.md`](docs/INVESTEC_API_NOTES.md), [`DEPLOY.md`](docs/DEPLOY.md), [`SECURITY.md`](docs/SECURITY.md), [`PLAN.md`](docs/PLAN.md) |
 | [`assets/`](assets/) | Diagrams (SVG and PNG, dark and light), screenshots, card previews, slide renders, fonts with their licences |
+| [`deploy/`](deploy/) | **The server.** Your own domain and HTTPS, so the room's phones reach the talk on any network: setup script, Caddy, systemd units, and a check of what's public and what isn't. [`deploy/README.md`](deploy/README.md) goes from renting the server to DNS to the day |
 | [`scripts/`](scripts/) | `demo.sh` runs the whole thing; `fuzz.sh` is DEMO 6; the secret and dash checks run before every commit |
 
 ---
@@ -81,7 +82,7 @@ URLs:
 | `http://localhost:3000/` | the projector |
 | `http://localhost:3000/sign` | the signing station laptop |
 | `http://localhost:3000/watch` | the audience's phones (a QR is on the slide) |
-| `http://localhost:3000/presenter` | your second screen, never the projector |
+| `http://localhost:3000/presenter#k=…` | your second screen, never the projector. Use the exact URL `demo.sh` prints: the token in it is what lets the panel load the card keys |
 
 Every one of the eight demos is a button on the presenter panel, and every one works with no
 network at all.
@@ -132,6 +133,11 @@ members, set `FIRST_ROUND_ENDS_AT` to a time during the talk, and deploy with
 `script/Deploy.s.sol`. The audience page then links every event to Basescan.
 [`docs/DEPLOY.md`](docs/DEPLOY.md) has the exact commands and what changes on a chain where time
 can't be warped.
+
+**Your own server and domain.** `localhost` only works on your laptop, and venue Wi-Fi usually
+won't let phones reach it. [`deploy/README.md`](deploy/README.md) puts the screens on a small
+server behind HTTPS, with the presenter panel behind a password and the chain read through a
+read-only proxy, then checks all of it from the outside.
 
 **The card.** `card/main.js` and a filled in `card/env.json` go into the Investec card IDE. It only
 uses `afterTransaction`, because `beforeTransaction` has about two seconds. [`card/README.md`](card/README.md).

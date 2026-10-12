@@ -53,7 +53,7 @@ MEMBERS = [
     ("06", "Sipho", "#E9C46A", 6),
 ]
 SPARES = [
-    ("04b", "Spare card", "#8AB17D", "Replaces card 04 after a RotateKey vote"),
+    ("06b", "Spare card", "#E9C46A", "Replaces card 06 after a RotateKey vote"),
     ("07", "Spare card", "#8A96AD", "Unassigned. Voted in when a member needs it"),
 ]
 TREASURER = ("T", "Treasurer", PRIMARY, "Holds the hat. Never holds the money.")

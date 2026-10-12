@@ -12,6 +12,7 @@ const ledger = new Ledger();
 const loaded = ledger.seed(seedFile);
 const app = createMockApp({ ledger, log, relayerWebhookUrl, selfUrl: `http://127.0.0.1:${port}`, cardDir: resolve(process.cwd(), "..", "card"), stateless: process.env.MOCK_STATELESS === "true" });
 
-serve({ fetch: app.fetch, port, hostname: "0.0.0.0" }, () => {
+// BIND_HOST=127.0.0.1 on a public server, so only Caddy can reach it (deploy/README.md)
+serve({ fetch: app.fetch, port, hostname: process.env.BIND_HOST ?? "0.0.0.0" }, () => {
   log.info({ port, seeded: loaded, balance: ledger.balance("1111122222333334444455555").currentBalance }, "mock Investec is up");
 });

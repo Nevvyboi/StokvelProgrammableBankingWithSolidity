@@ -25,6 +25,14 @@ Configuration is read at runtime from `/api/config` (env plus `contracts/deploym
 so a redeploy needs no rebuild. For Base Sepolia set `CHAIN_ID=84532` and, if the deployment file is
 elsewhere, `STOKVEL_ADDRESS`; the explorer links switch to Basescan on their own.
 
+`/api/rpc` is a read-only JSON-RPC proxy: with `PUBLIC_RPC_URL=/api/rpc` the browsers read the chain
+through this server (reads of the two Stokvel contracts only, nothing that writes), so phones never
+need to reach a node and the provider key in `RPC_URL` stays server side. `deploy/` uses it.
+
+`/api/keys` hands the card keys to the presenter panel only with the `PRESENTER_TOKEN` that
+`scripts/demo.sh` makes on every run (it prints the presenter URL with the token in it). Without a
+token it is off, which is how the public server runs it.
+
 ## The design
 
 Not a dashboard. A ledger: ruled rows, tabular figures, a running balance, rubber stamps for state,

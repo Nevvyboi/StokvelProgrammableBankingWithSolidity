@@ -1,0 +1,22 @@
+# The mock Investec server (INVESTEC_MODE=mock). Starts empty on a fresh chain: no seeded months.
+[Unit]
+Description=Stokvel mock Investec server
+After=network-online.target
+
+[Service]
+User=stokvel
+Group=stokvel
+WorkingDirectory=/opt/stokvel/relayer
+EnvironmentFile=/etc/stokvel/stokvel.env
+Environment=NODE_ENV=production BIND_HOST=127.0.0.1 MOCK_PORT=4100
+ExecStart=/opt/stokvel/relayer/node_modules/.bin/tsx src/mock/index.ts
+Restart=always
+RestartSec=2
+
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target
