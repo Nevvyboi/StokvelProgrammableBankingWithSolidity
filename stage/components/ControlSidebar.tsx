@@ -8,6 +8,10 @@ import { FOCUS, type Focus } from "@/lib/focus";
 import { MEMBERS, formatRands } from "@/lib/members";
 import { anvilMember, nonceOf, relayerPost, signJoin, signVote } from "@/lib/signing";
 import type { useStage } from "@/lib/useStage";
+import { REHEARSAL_STANDINS, RUN_ORDER } from "@/lib/runOrder";
+
+// every command in the run order, in order, so the next one can be highlighted as you go
+const ORDER_CMDS = RUN_ORDER.flatMap((d) => d.steps.flatMap((x) => ("cmd" in x ? [x.cmd] : [])));
 
 type Stage = ReturnType<typeof useStage>;
 type CardKey = { label: string; name: string; privateKey: `0x${string}`; address: string; memberId?: number };
@@ -45,6 +49,8 @@ export function ControlSidebar({
   const [history, setHistory] = useState<string[]>([]);
   const [hIndex, setHIndex] = useState(-1);
   const [busy, setBusy] = useState(false);
+  const [tab, setTab] = useState<"order" | "commands">("order");
+  const [pos, setPos] = useState(0); // the next command in the run order
   const [keys, setKeys] = useState<CardKey[]>([]);
   const [fallbackStep, setFallbackStep] = useState(0);
   const [script, setScript] = useState<Array<{ title: string; payload: unknown }>>([]);
@@ -199,11 +205,12 @@ export function ControlSidebar({
     {
       words: "double v1",
       about: "V1 gets the same bank transaction twice and counts it twice",
-      calls: () => ["GET /relayer/bank  → the latest credit", '2 × POST /relayer/admin/replay {target:"v1"}  → recordContribution()'],
+      calls: () => ["GET /relayer/bank  → the latest STK-0n credit", '2 × POST /relayer/admin/replay {target:"v1"}  → recordContribution()'],
       run: async () => {
         const bank = await fetch(`${cfg?.relayerUrl ?? "/relayer"}/bank`).then((r) => r.json()).catch(() => null);
-        const tx = bank?.transactions?.find((t: { type: string }) => t.type === "CREDIT");
-        if (!tx) return { ok: false, text: "no credit on the statement to replay" };
+        // a member's contribution: the newest credit with an STK-0n reference (not the putback refund)
+        const tx = bank?.transactions?.find((t: { type: string; description?: string; reference?: string }) => t.type === "CREDIT" && /STK-0[1-6]/.test(`${t.description ?? ""} ${t.reference ?? ""}`));
+        if (!tx) return { ok: false, text: "no member contribution on the statement to replay" };
         return [await relayer("/admin/replay", { transaction: tx, target: "v1" }), await relayer("/admin/replay", { transaction: tx, target: "v1" })];
       },
     },
@@ -330,6 +337,13 @@ export function ControlSidebar({
     setHistory((h) => [t, ...h.filter((x) => x !== t)].slice(0, 50));
     setHIndex(-1);
     setInput("");
+    // typing the highlighted run-order command, or one further on (a step skipped), moves the
+    // highlight past it
+    const norm = t.toLowerCase().replace(/\s+/g, " ");
+    setPos((p) => {
+      const at = ORDER_CMDS.indexOf(norm, p);
+      return at === -1 ? p : at + 1;
+    });
     if (t === "clear") return setLines([]);
     if (t === "help") return say({ kind: "in", text: t }, ...commands.map((c) => ({ kind: "info" as const, text: `${c.words}\n   ${c.about}` })));
     const hit = find(t);
@@ -418,28 +432,75 @@ export function ControlSidebar({
         </div>
       </form>
 
-      {/* the commands: your words big, what they do small. Click to use one */}
-      <div className="max-h-[38%] overflow-y-auto border-t border-line px-4 py-3">
-        <div className="mb-2 text-xs uppercase tracking-wider text-muted">Commands · click to use · Tab completes · ↑ history</div>
-        <ul className="space-y-1.5">
-          {commands.map((c) => (
-            <li key={c.words}>
-              <button
-                className="w-full text-left hover:text-primary"
-                onClick={() => {
-                  const f = fixed(c).join(" ");
-                  if (c.words.includes("<")) {
-                    setInput(f + " ");
-                    inputRef.current?.focus();
-                  } else submit(f);
-                }}
-              >
-                <span className="font-mono text-[14px]">{c.words}</span>
-                <span className="block text-[11.5px] leading-snug text-muted">{c.about}</span>
-              </button>
-            </li>
+      {/* the run order, and the commands: click a line to put it in the box */}
+      <div className="flex max-h-[46%] min-h-[30%] flex-col border-t border-line">
+        <div className="flex items-center gap-1 px-4 pt-2 text-xs uppercase tracking-wider">
+          {(["order", "commands"] as const).map((t) => (
+            <button key={t} onClick={() => setTab(t)} className={`border-b-2 px-2 py-1 ${tab === t ? "border-primary text-text" : "border-transparent text-muted hover:text-text"}`}>
+              {t === "order" ? "Run order" : "All commands"}
+            </button>
           ))}
-        </ul>
+          <span className="ml-auto normal-case tracking-normal text-muted">click to put it in the box · Tab · ↑</span>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
+          {tab === "order" ? (
+            <ol className="space-y-3">
+              {(() => {
+                let i = -1;
+                return RUN_ORDER.map((d) => (
+                  <li key={d.demo}>
+                    <div className="text-xs uppercase tracking-wider text-muted">
+                      <b className="text-text">{d.demo}</b> · {d.title}
+                    </div>
+                    <ul className="mt-1 space-y-1">
+                      {d.steps.map((x, j) => {
+                        if ("cue" in x) return <li key={j} className="border-l-2 border-line pl-2 text-[12.5px] italic leading-snug text-muted">{x.cue}</li>;
+                        i += 1;
+                        const idx = i;
+                        const state = idx < pos ? "done" : idx === pos ? "next" : "later";
+                        return (
+                          <li key={j}>
+                            <button
+                              onClick={() => {
+                                setPos(idx);
+                                setInput(x.cmd);
+                                inputRef.current?.focus();
+                              }}
+                              className={`flex w-full items-baseline gap-2 text-left ${state === "next" ? "text-primary" : state === "done" ? "text-muted" : "hover:text-primary"}`}
+                            >
+                              <span className="font-mono w-3 shrink-0 text-xs">{state === "done" ? "✓" : state === "next" ? "▸" : ""}</span>
+                              <span className={`font-mono text-[14px] ${state === "next" ? "font-semibold" : ""}`}>{x.cmd}</span>
+                              {x.note && <span className="text-[11.5px] leading-snug text-muted">{x.note}</span>}
+                            </button>
+                          </li>
+                        );
+                      })}
+                      {REHEARSAL_STANDINS[d.demo] && <li className="pl-5 text-[11.5px] text-muted">rehearsing alone, no volunteers: <span className="font-mono">{REHEARSAL_STANDINS[d.demo]}</span></li>}
+                    </ul>
+                  </li>
+                ));
+              })()}
+            </ol>
+          ) : (
+            <ul className="space-y-1.5">
+              {commands.map((c) => (
+                <li key={c.words}>
+                  <button
+                    className="w-full text-left hover:text-primary"
+                    onClick={() => {
+                      const f = fixed(c).join(" ");
+                      setInput(c.words.includes("<") ? f + " " : f);
+                      inputRef.current?.focus();
+                    }}
+                  >
+                    <span className="font-mono text-[14px]">{c.words}</span>
+                    <span className="block text-[11.5px] leading-snug text-muted">{c.about}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </aside>
   );
