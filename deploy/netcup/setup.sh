@@ -46,7 +46,7 @@ BIND=$(docker network inspect "$DOCKER_NET" -f '{{range .IPAM.Config}}{{.Gateway
 [[ $BIND =~ ^[0-9.]+$ ]] || die "no gateway address for $DOCKER_NET"
 echo "  services will listen on $BIND (reachable by nginx, not by the internet)"
 for p in 3000 4000 4100 4200 8545; do
-  if ss -ltnp "sport = :$p" | grep -q LISTEN && ! ss -ltnp "sport = :$p" | grep -qE 'node|next'; then die "port $p is taken by something else"; fi
+  if ss -ltnp "sport = :$p" | grep -q LISTEN && ! ss -ltnp "sport = :$p" | grep -qE 'node|next|anvil'; then die "port $p is taken by something else"; fi
 done
 
 declare -A before
