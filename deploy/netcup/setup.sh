@@ -173,7 +173,7 @@ ngx() { docker exec "$NGINX_CTR" nginx "$@"; }
 # the container sees nginx.conf through a single-file bind mount: write it in place, never
 # replace it (sed -i or an editor's save-as-new-file would leave the container on the old copy)
 include_off() { local t; t=$(mktemp); grep -vF "$MARK" "$NGINX_CONF" > "$t" || true; cat "$t" > "$NGINX_CONF"; rm -f "$t"; }
-include_on() { grep -qF "$MARK" "$NGINX_CONF" || printf '\n%s\n' "$INCLUDE" >> "$NGINX_CONF"; }
+include_on() { grep -qF "$MARK" "$NGINX_CONF" || printf '%s\n' "$INCLUDE" >> "$NGINX_CONF"; }
 render() { sed -e "s|__DOMAIN__|$DOMAIN|g" -e "s|__BIND__|$BIND|g" "$@"; }
 apply() { # apply <what>: test, then reload, or put everything back as it was and stop
   local out; out=$(ngx -t -q 2>&1) && { ngx -s reload; echo "  nginx reloaded ($1)"; return; }

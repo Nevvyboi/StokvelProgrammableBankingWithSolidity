@@ -60,9 +60,11 @@ else
   echo "  not there"
 fi
 if [[ -f $NGINX_CONF.bak-stokvel ]]; then
-  # blank lines aside: setup.sh added one before the include
+  # blank lines aside (older setup.sh runs added one before the include)
   if diff -q <(grep -v '^[[:space:]]*$' "$NGINX_CONF") <(grep -v '^[[:space:]]*$' "$NGINX_CONF.bak-stokvel") >/dev/null; then
-    echo "  $NGINX_CONF is as it was before the talk"
+    # nothing else changed since, so put it back byte for byte (in place; same content to nginx)
+    cat "$NGINX_CONF.bak-stokvel" > "$NGINX_CONF"
+    echo "  $NGINX_CONF is byte for byte as it was before the talk"
   else
     echo "  note: $NGINX_CONF differs from before the talk in other places too (DataBrew edits since?). Left as it is."
   fi
