@@ -1,7 +1,6 @@
 /**
- * The projector can blow one section up to fill the screen. Keys 1 to 5 on the projector, a click
- * on a section, or the presenter panel's buttons (over the "stokvel-stage" BroadcastChannel, so
- * the presenter window must be in the same browser, as it is on the laptop driving the projector).
+ * The board can blow one section up to fill the screen: keys 1 to 5, a click on the section, or
+ * the run sheet's "Screen" buttons. 0, Esc or a click goes back to everything.
  */
 export type Focus = "bank" | "roster" | "pot" | "minutes" | "quilt";
 

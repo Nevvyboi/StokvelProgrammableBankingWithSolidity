@@ -33,7 +33,7 @@ expect 200 "relayer bank"             "$BASE/relayer/bank"
 expect 200 "relayer health"           "$BASE/relayer/health"
 
 echo "presenter only, must ask for the password"
-expect 401 "presenter panel"          "$BASE/presenter"
+expect 401 "presenter login"          "$BASE/presenter"
 expect 401 "card keys"                "$BASE/api/keys"
 expect 401 "relayer admin (clock)"    -X POST "$BASE/relayer/admin/warp"
 expect 401 "relayer admin (kill)"     -X POST "$BASE/relayer/admin/kill"
@@ -45,7 +45,7 @@ expect 401 "mock bank: state"         "$BASE/mock/__mock/state"
 
 if [[ -n ${PRESENTER_USER:-} && -n ${PRESENTER_PASS:-} ]]; then
   echo "with the presenter login"
-  expect 200 "presenter panel"        -u "$PRESENTER_USER:$PRESENTER_PASS" "$BASE/presenter"
+  expect 307 "presenter login, back to the board" -u "$PRESENTER_USER:$PRESENTER_PASS" "$BASE/presenter"
   expect 403 "card keys stay off"     -u "$PRESENTER_USER:$PRESENTER_PASS" "$BASE/api/keys"
   expect 200 "mock bank state"        -u "$PRESENTER_USER:$PRESENTER_PASS" "$BASE/mock/__mock/state"
 fi

@@ -19,9 +19,9 @@ that don't sound like you.
 ./scripts/demo.sh --mock
 ```
 
-Put the projector page on one screen, the presenter panel on another, and the signing station on
+Put the projector page on one screen with the run sheet open (D), and the signing station on
 a third window (or a second laptop, which is how it'll be on the night). Run every demo from the
-presenter panel in run-sheet order, saying the script, with the timer running. Then do it again
+run sheet in order, saying the script, with the timer running. Then do it again
 with the stage app in fallback mode (`/?fallback=1`) so you know what the recorded path looks
 like.
 
@@ -33,7 +33,7 @@ Things that go wrong in this rehearsal, in the order they usually do:
 - You press "Skip to month end" before everyone has paid. The round closes with a smaller pot.
   Fine: it's a stokvel, not everyone pays on time. Say so.
 - The relayer is mid-restart when you press a button. Wait for "relayer up" in the header.
-- The presenter panel and the dashboard show different contribution amounts for a second. The
+- The run sheet and the board show different contribution amounts for a second. The
   dashboard polls every two seconds; wait.
 
 ## Rehearsal 3: the room (with people)

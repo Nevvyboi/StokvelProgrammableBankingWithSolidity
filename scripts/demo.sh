@@ -135,8 +135,9 @@ cat <<EOF
   projector      http://localhost:3000/
   signing        http://localhost:3000/sign
   audience       http://localhost:3000/watch
-  presenter      http://localhost:3000/presenter#k=$PRESENTER_TOKEN
-                 (keep this one off the projector; the token is new every run)
+  run sheet      http://localhost:3000/#k=$PRESENTER_TOKEN
+                 (the projector page with the card keys loaded; the run sheet is the
+                 sidebar, D or the tab on the right. The token is new every run)
 
   relayer        http://localhost:4000/health
   bank           http://localhost:$BANK_PORT/__mock/state   ($MODE)

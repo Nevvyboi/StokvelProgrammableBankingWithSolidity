@@ -9,7 +9,7 @@ and the pages keep reading the chain.
 | `/` | the projector | The treasurer's book, kept in public. Left page: the Investec statement. Right page: the rulebook, with the pot, the auditor's reconciliation of reserves, the roster in rotation order, and the quilt. Bottom: the minute book of messages crossing between bank and chain. `FROZEN` and `REFUSED` stamp the whole screen red when the contract says no |
 | `/sign` | the signing station laptop | Scan a member card (USB scanner or webcam), read the EIP-712 message as one English sentence on a paper slip, press Sign. The key is dropped from memory afterwards and never leaves the page |
 | `/watch` | the room's phones | Read only passbook: pot, roster, quilt, and every event with a Basescan link. Never shows or accepts a key |
-| `/presenter` | the presenter's second screen | One button per demo step, a log of every call, and the fallback toggle. Keep it off the projector |
+| `/presenter` | the login door | Behind the presenter password on a server; sends you back to `/` with the run sheet (the sidebar, D) unlocked. The run sheet has one button per demo step, the call each makes, the screen zoom and the fallback toggle |
 
 ## Run it
 
@@ -29,7 +29,7 @@ elsewhere, `STOKVEL_ADDRESS`; the explorer links switch to Basescan on their own
 through this server (reads of the two Stokvel contracts only, nothing that writes), so phones never
 need to reach a node and the provider key in `RPC_URL` stays server side. `deploy/` uses it.
 
-`/api/keys` hands the card keys to the presenter panel only with the `PRESENTER_TOKEN` that
+`/api/keys` hands the card keys to the run sheet only with the `PRESENTER_TOKEN` that
 `scripts/demo.sh` makes on every run (it prints the presenter URL with the token in it). Without a
 token it is off, which is how the public server runs it.
 
@@ -45,7 +45,7 @@ in the deck: `lib/quilt.tsx` is the source, `cards/generate.py` and `slides/gene
 
 ## Fallback mode
 
-If the chain or the relayer dies on stage, the presenter panel flips the dashboard to fallback mode
+If the chain or the relayer dies on stage, the run sheet flips the dashboard to fallback mode
 (or open `/?fallback=1`). It loads `public/fallback/snapshot.json`, a capture of the seeded state,
 and the presenter steps through `public/fallback/script.json`, which replays every demo as feed
 lines, ledger changes and stamps. `scripts/fallback-snapshot.mjs` recaptures the snapshot from a

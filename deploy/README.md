@@ -1,7 +1,7 @@
 # Hosting the talk on your own server and domain
 
 This folder puts the whole demo on a small server behind your own domain. The projector, the
-signing station, your presenter panel and the audience's phones all reach it over HTTPS. It
+signing station, your run sheet and the audience's phones all reach it over HTTPS. It
 doesn't matter whether the room is on venue Wi-Fi or mobile data.
 
 ```
@@ -16,7 +16,7 @@ doesn't matter whether the room is on venue Wi-Fi or mobile data.
 | `https://<domain>/` | the projector | everyone |
 | `https://<domain>/watch` | the audience's phones, from the QR (`qr.sh`) | everyone |
 | `https://<domain>/sign` | the signing station laptop | everyone (the key never leaves the page) |
-| `https://<domain>/presenter` | you, on your second screen | **password** |
+| `https://<domain>/presenter` | you, once: log in, and it brings you back to `/` with the run sheet open | **password** |
 
 **Why Base Sepolia and not Anvil on the server.** The talk's promise is "you don't have to take my
 word for any of this." A private chain on your own server is a database you control, so the room
@@ -226,13 +226,13 @@ lectern. The deck doesn't have one yet: the QR on the closing slide is the repo 
 |---|---|---|
 | Projector laptop | `https://<domain>/` | full screen, extended display (not mirrored) |
 | Signing station | `https://<domain>/sign` | USB scanner, or the webcam (which works because the site is HTTPS) |
-| Your second screen | `https://<domain>/presenter` | log in once. Never on the projector |
+| The projector laptop, once | `https://<domain>/presenter` | log in; it brings you back to `/` with the run sheet (the sidebar, D) unlocked. The room sees each command as you press it |
 | Phones | the QR | read only |
 
 What's different from a local `demo.sh` run:
 
 - **Members sign with their cards at `/sign`.** The card keys are never on the server, so the
-  presenter panel has no "Lerato signs" buttons. That's deliberate: the old fallback keys aren't
+  run sheet has no "Lerato signs" buttons. That's deliberate: the old fallback keys aren't
   members on Base Sepolia and would only put a REFUSED stamp on the projector. If a card won't
   scan, type its key into the paste box on `/sign`.
 - **DEMO 3:** the round ends at `FIRST_ROUND_ENDS_AT`. "Skip to month end" can't move time. Say
@@ -266,7 +266,7 @@ source of truth). After a redeploy of the contract, commit the new `deployments/
 | Projector says `chain down` | the RPC key is wrong, or its plan caps `eth_getLogs` | `check.sh` names which; `journalctl -u stokvel-stage` |
 | Projector says `relayer down` | relayer crashed or is restarting | `journalctl -u stokvel-relayer -f` |
 | Relayer log: `insufficient funds` | the relayer or attestor key ran out of Base Sepolia ETH | top it up from a faucet |
-| Presenter asks for the password on every click | the browser didn't keep the login | log in on `/presenter` itself first; use a normal (not private) window |
+| Presenter asks for the password on every click | the browser didn't keep the login | open `/presenter` and log in first; use a normal (not private) window |
 | `/sign`: "Not a member" for a real card | the contract was deployed without `MEMBERS_FILE=../cards/out/members.json`, or the cards were regenerated after printing | redeploy with the printed cards' `members.json` |
 | DEMO 8's propose button logs "no card 06b" | `SPARE_ADDRESS` is empty | set it in `stokvel.env`, run `setup.sh` |
 

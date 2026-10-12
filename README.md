@@ -34,7 +34,7 @@ them and can't make decisions. The contract never holds funds.**
 | [`contracts/`](contracts/) | **The rulebook.** `Stokvel.sol` records contributions in cents, enforces proof of reserves, pays out strictly in rotation, and runs gasless card votes with a timelock and social recovery. `StokvelV1Vulnerable.sol` is the same contract minus one line, for the double-webhook demo. 76 tests, an invariant suite that breaks V1 in seconds, Slither clean |
 | [`relayer/`](relayer/) | **The messenger.** Four idempotent loops between Investec and the chain, a mock Investec server that mirrors the sandbox's routes and shapes (and runs the real card code), and a smoke test for the real sandbox |
 | [`card/`](card/) | **The round-up.** Programmable card code: R87 at the bakery becomes a R3 contribution with reference `STK-03` |
-| [`stage/`](stage/) | **The screens.** The projector dashboard drawn as the treasurer's book, the signing station, the read-only audience page, and the hidden presenter panel. No database: everything is read from the chain |
+| [`stage/`](stage/) | **The screens.** The projector dashboard drawn as the treasurer's book, the signing station, the read-only audience page, and the hidden run sheet. No database: everything is read from the chain |
 | [`cards/`](cards/) | **The props.** Nine printable member cards (85.6 x 54 mm, bleed, crop marks) with throwaway testnet keys as QR codes |
 | [`slides/`](slides/) | **The PowerPoint**, dark and light, plus the PDF and the generator that builds them |
 | [`deck/`](deck/) | **The backup deck**: the same talk as one self-contained HTML file, fonts and diagrams inlined |
@@ -82,9 +82,9 @@ URLs:
 | `http://localhost:3000/` | the projector |
 | `http://localhost:3000/sign` | the signing station laptop |
 | `http://localhost:3000/watch` | the audience's phones (a QR is on the slide) |
-| `http://localhost:3000/presenter#k=…` | your second screen, never the projector. Use the exact URL `demo.sh` prints: the token in it is what lets the panel load the card keys |
+| `http://localhost:3000/#k=…` | the projector page with the run sheet: press D or the tab on the right. Use the exact URL `demo.sh` prints: the token in it loads the card keys |
 
-Every one of the eight demos is a button on the presenter panel, and every one works with no
+Every one of the eight demos is a button in the run sheet, and every one works with no
 network at all.
 
 <table>
@@ -136,7 +136,7 @@ can't be warped.
 
 **Your own server and domain.** `localhost` only works on your laptop, and venue Wi-Fi usually
 won't let phones reach it. [`deploy/README.md`](deploy/README.md) puts the screens on a small
-server behind HTTPS, with the presenter panel behind a password and the chain read through a
+server behind HTTPS, with the run sheet behind a password and the chain read through a
 read-only proxy, then checks all of it from the outside.
 
 **The card.** `card/main.js` and a filled in `card/env.json` go into the Investec card IDE. It only
