@@ -10,8 +10,8 @@ export const RUN_ORDER: RunDemo[] = [
     demo: "DEMO 1",
     title: "The committee",
     steps: [
-      { cmd: "zoom roster", note: "so the room sees who signs in" },
-      { cue: "The six volunteers point their phone camera at the back of their card, tap the link, read the slip, press Sign. Wait for six ✓ signed in." },
+      { cmd: "zoom constitution", note: "the rules, and six empty signature lines" },
+      { cue: "The six volunteers point their phone camera at the back of their card, tap the link, read the slip, press Sign. Each signature lands on its line; the sixth brings up \"Everyone has signed the constitution\"." },
       { cmd: "zoom all" },
     ],
   },

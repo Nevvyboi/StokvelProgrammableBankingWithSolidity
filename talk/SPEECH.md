@@ -167,6 +167,12 @@ worth nothing. Treat the card like cash anyway, because that's the habit we're t
 This is the treasurer's book. Left page, the Investec account. Right page, the chain. Both of
 them live, both of them public.
 
+`Run sheet: zoom constitution`
+
+This is the club's constitution. Seven rules, and six empty lines at the bottom. The contract
+holds the fingerprint of exactly this text, so nobody can later claim you agreed to something
+else.
+
 Committee, take out your phones. Turn your card over and point your camera at the QR on the
 back. Tap the link it offers.
 
@@ -180,13 +186,18 @@ Lerato, read me what your phone says.
 Look at the sentence. Not a hex string. English. That's what her card is signing, and the
 contract only accepts it because that card is member one. Press Sign.
 
-*Wait for the minute book line: "Member joined", and "✓ signed in" next to Lerato on the roster.*
+*Wait for Lerato's name to land on her signature line.*
 
-And there she is on the right page. Signed in. Nobody typed her name in. The chain knows her
+And there she is, on her line. Signed. Nobody typed her name in. The chain knows her
 from the signature. Everybody else on the committee: Sign.
 
 *The other five land in a few seconds. Talk over it. If a phone won't scan, that card goes to
-the signing station at the side.*
+the signing station at the side. The sixth signature brings up "Everyone has signed the
+constitution". Let it sit for a beat.*
+
+★ Six strangers, one set of rules, and every signature their own. That's a stokvel.
+
+`Run sheet: zoom all`
 
 While they sign, everybody else: scan the QR on the screen. That's the audience page. Read only,
 the same record the projector shows, live on your phone.

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useStage } from "@/lib/useStage";
 import { FOCUS, type Focus } from "@/lib/focus";
@@ -10,6 +10,7 @@ import { Blocks, PotLine, Reconciliation, Roster } from "@/components/ChainPanel
 import { FeedPanel } from "@/components/FeedPanel";
 import { QuiltWall } from "@/components/QuiltWall";
 import { ControlSidebar } from "@/components/ControlSidebar";
+import { ConstitutionPage, SignedPopup } from "@/components/Constitution";
 
 // the board is laid out once, for a 1080p projector, and scaled to whatever window it's in, so a
 // laptop screen or a smaller window shows all of it, smaller, instead of cutting the bottom off
@@ -64,10 +65,32 @@ function Dashboard() {
   const s = useStage({ fallback });
   const fit = useFit();
 
+  // the constitution: its text for the page, and the moment the sixth member signs it. Only a
+  // signature that lands while the board is watching raises the pop-up, not a reload after
+  const [constitution, setConstitution] = useState("");
+  useEffect(() => {
+    fetch("/api/constitution").then((r) => r.json()).then((d) => setConstitution(d.text ?? "")).catch(() => {});
+  }, []);
+  const [allSigned, setAllSigned] = useState(false);
+  const joinedBefore = useRef<number | null>(null);
+  const joinedNow = s.state ? s.state.members.filter((m) => m.joined).length : null;
+  useEffect(() => {
+    if (joinedNow === null) return;
+    const before = joinedBefore.current;
+    joinedBefore.current = joinedNow;
+    if (before !== null && before < 6 && joinedNow === 6) setAllSigned(true);
+  }, [joinedNow]);
+  useEffect(() => {
+    if (!allSigned) return;
+    const t = setTimeout(() => setAllSigned(false), 12_000);
+    return () => clearTimeout(t);
+  }, [allSigned]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (s.alarm) s.dismissAlarm();
+        if (allSigned) setAllSigned(false);
+        else if (s.alarm) s.dismissAlarm();
         else setFocus(null);
       }
       if (e.key === "0") setFocus(null);
@@ -77,7 +100,7 @@ function Dashboard() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [s]);
+  }, [s, allSigned]);
 
   const label = focus ? FOCUS.find((f) => f.id === focus)!.label : null;
   const zoomable = (id: Focus) => ({ onClick: () => setFocus(id), className: "cursor-zoom-in", title: "Click, or press its number, to fill the screen" });
@@ -93,6 +116,7 @@ function Dashboard() {
       <div style={{ width: W, height: H, transform: `translate(${fit.x}px, ${fit.y}px) scale(${fit.k})`, transformOrigin: "top left" }}>
         <main className="flex h-full flex-col overflow-hidden px-10 pb-5 pt-6">
           <Alarm alarm={s.alarm} onDismiss={s.dismissAlarm} />
+          {allSigned && <SignedPopup onDismiss={() => setAllSigned(false)} />}
 
           <header className="flex items-end justify-between pb-4">
             <div className="flex items-baseline gap-5">
@@ -154,6 +178,11 @@ function Dashboard() {
                     </div>
                   </section>
                 </Zoomed>
+              )}
+              {focus === "constitution" && (
+                <div style={{ width: FOCUS_W, height: FOCUS_H }}>
+                  <ConstitutionPage text={constitution} state={s.state} events={s.events} />
+                </div>
               )}
               {focus === "quilt" && (
                 <section className="page h-full">

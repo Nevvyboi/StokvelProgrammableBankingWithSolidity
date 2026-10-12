@@ -59,8 +59,14 @@ export function ControlSidebar({
   const outRef = useRef<HTMLDivElement>(null);
   const cfg = s.cfg;
 
+  // focus the box when it opens; when it closes, give the keyboard back to the board, or the
+  // hidden box keeps it and swallows D and the zoom keys (and types them into the next command)
   useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 220);
+    if (open) {
+      const t = setTimeout(() => inputRef.current?.focus(), 220);
+      return () => clearTimeout(t);
+    }
+    inputRef.current?.blur();
   }, [open]);
   useEffect(() => {
     outRef.current?.scrollTo({ top: outRef.current.scrollHeight });
@@ -276,8 +282,8 @@ export function ControlSidebar({
       run: () => relayer("/admin/kill"),
     },
     {
-      words: "zoom <bank|pot|roster|minutes|quilt|all>",
-      about: "fill the screen with one section (or keys 1 to 5, and 0)",
+      words: "zoom <constitution|bank|pot|roster|minutes|quilt|all>",
+      about: "fill the screen with one section (or keys 1 to 6, and 0)",
       calls: () => [],
       run: async (a) => {
         const f = a[0] ? FOCUS.find((x) => x.id === a[0] || x.key === a[0] || x.label.toLowerCase().startsWith(a[0]!)) : undefined;
@@ -366,7 +372,7 @@ export function ControlSidebar({
   };
 
   return (
-    <aside className={`fixed right-0 top-0 z-40 flex h-full w-[460px] flex-col border-l border-line bg-bg/95 shadow-2xl backdrop-blur transition-transform duration-200 ${open ? "translate-x-0" : "translate-x-full"}`} aria-hidden={!open}>
+    <aside className={`fixed right-0 top-0 z-40 flex h-full w-[460px] flex-col border-l border-line bg-bg/95 shadow-2xl backdrop-blur transition-transform duration-200 ${open ? "translate-x-0" : "translate-x-full"}`} aria-hidden={!open} inert={!open}>
       <header className="flex items-center justify-between border-b border-line px-4 py-3">
         <div>
           <div className="font-display text-xl font-medium">Run sheet</div>
