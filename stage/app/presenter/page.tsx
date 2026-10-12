@@ -5,6 +5,7 @@ import { toHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { useStage } from "@/lib/useStage";
 import { loadStageConfig } from "@/lib/config";
+import { FOCUS, type Focus } from "@/lib/focus";
 import { MEMBERS, formatRands } from "@/lib/members";
 import { anvilMember, nonceOf, relayerPost, signJoin, signVote } from "@/lib/signing";
 import type { ProposalState } from "@/lib/chain";
@@ -158,6 +159,15 @@ export default function Presenter() {
             round {s.state ? (s.state.round + 1n).toString() : "?"} · pot {s.state ? formatRands(s.state.pot) : "?"} · {s.relayerUp ? "relayer up" : "RELAYER DOWN"} · {chainOnly ? "no time travel on this chain" : "Anvil"}
           </div>
         </header>
+
+        <Step n="Projector" title="Fill the screen with one section">
+          <Btn tone="border-primary text-primary" onClick={() => { channel.current?.postMessage({ type: "focus", focus: null }); say("projector: everything"); }}>Everything</Btn>
+          {FOCUS.map((f) => (
+            <Btn key={f.id} onClick={() => { channel.current?.postMessage({ type: "focus", focus: f.id satisfies Focus }); say(`projector: ${f.label.toLowerCase()}`); }}>
+              {f.key} · {f.label}
+            </Btn>
+          ))}
+        </Step>
 
         <Step n="DEMO 1" title="The committee signs the constitution">
           {keys.filter((k) => k.memberId !== undefined).map((k) => (

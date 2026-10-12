@@ -11,6 +11,11 @@ pane in PowerPoint). This is the full version to rehearse out loud. Stage direct
 *italics*. Demo cues are in `code` and match the buttons on `/presenter`. Lines marked ★ are the
 ones to keep even when everything else goes sideways. Don't read it word for word on the night.
 
+**Zoom the projector** when a moment needs the room to read it: on `/presenter`, "Projector"
+has a button per section (1 bank statement, 2 pot and reconciliation, 3 roster, 4 minute book,
+5 quilt) and "Everything"; on the projector itself, the same number keys, a click, or Esc. Good
+moments: 3 while the committee signs in, 1 when the R3 lands, 2 for FROZEN.
+
 The safety line, said once, out loud, before the first demo: "Everything you see tonight is a
 simulated bank and a private test chain. There is no real money here and no real person's data."
 
