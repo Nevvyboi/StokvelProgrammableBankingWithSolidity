@@ -58,9 +58,12 @@ printf '  %s\n' "neighbours now: $(for u in "${NEIGHBOURS[@]}"; do printf '%s=%s
 if ! node -v 2>/dev/null | grep -qE '^v(2[2-9]|[3-9][0-9])\.'; then
   step "Node.js 22 (NodeSource); nothing else on this server uses Node"
   command -v node >/dev/null && die "an older Node is installed; not replacing something we didn't install"
+  # NodeSource's installer may add helper packages too; remember which were new, for teardown.sh
+  helpers=(apt-transport-https ca-certificates curl gnupg)
+  mkdir -p "$ETC"
+  for p in "${helpers[@]}"; do dpkg -s "$p" >/dev/null 2>&1 || echo "$p"; done > "$ETC/.we-installed-node"
   curl -fsSL https://deb.nodesource.com/setup_22.x | bash - >/dev/null
   DEBIAN_FRONTEND=noninteractive apt-get install -y -qq nodejs >/dev/null
-  mkdir -p "$ETC" && touch "$ETC/.we-installed-node"
 fi
 node -v
 

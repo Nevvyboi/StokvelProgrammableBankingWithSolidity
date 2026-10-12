@@ -91,7 +91,9 @@ if [[ -f $SWAP ]]; then swapoff "$SWAP" 2>/dev/null; rm -f "$SWAP"; echo "  left
 # ---------------------------------------------------------------- Node, only if setup.sh installed it
 step "Node.js"
 if [[ -f $ETC/.we-installed-node ]]; then
-  DEBIAN_FRONTEND=noninteractive apt-get purge -y -qq nodejs >/dev/null
+  # nodejs, and the helper packages NodeSource's installer added (listed in the marker by setup.sh)
+  mapfile -t extra < <(grep -vE '^\s*$' "$ETC/.we-installed-node")
+  DEBIAN_FRONTEND=noninteractive apt-get purge -y -qq nodejs "${extra[@]}" >/dev/null
   rm -f /etc/apt/sources.list.d/nodesource.list /etc/apt/sources.list.d/nodesource.sources \
         /etc/apt/keyrings/nodesource.gpg /usr/share/keyrings/nodesource.gpg /etc/apt/preferences.d/nodejs
   apt-get update -qq >/dev/null 2>&1 || true
