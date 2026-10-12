@@ -49,9 +49,11 @@ export default function Presenter() {
         if (d.keys) {
           setKeys(d.keys.map((k: { label: string; name: string; privateKey: `0x${string}`; memberId?: number }) => ({ ...k, address: privateKeyToAccount(k.privateKey).address })));
           say("loaded member keys from cards/out/keys.json");
-        } else if ((await loadStageConfig()).chainId !== 31337) {
-          // Anvil's test keys are not members on a public chain: a "signs" button would only put a
-          // REFUSED stamp on the projector. On a public server the members sign with their cards
+        } else if (await loadStageConfig().then((c) => c.chainId !== 31337 || c.spareAddress)) {
+          // Anvil's test keys are not members on a public chain, nor on a server's own Anvil that
+          // was armed with the printed cards (SPARE_ADDRESS set): a "signs" button would only put a
+          // REFUSED stamp on the projector, and DEMO 8 would move Sipho to an Anvil key instead of
+          // card 06b. On a server the members sign with their cards
           setKeys([]);
           say("card keys are not served here: members sign with their cards at /sign");
         } else {
