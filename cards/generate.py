@@ -8,9 +8,14 @@ fronts on one sheet and backs on the next so a print shop can duplex them.
 
   python3 generate.py                 real keys -> out/ (gitignored)
   python3 generate.py --preview       fake, visibly invalid keys -> ../assets/cards/ previews
+  python3 generate.py --sign-url https://stokvel.example/sign
+                                      QRs a phone camera opens: <url>#stokvel:v1:<key>
+  python3 generate.py --from-keys out/keys.json --sign-url ...
+                                      redraw out/cards.pdf from the same keys (members.json unchanged)
 
 Front: club name, member number, persona name, the member's quilt patch, turn in rotation.
-Back:  the signing QR (stokvel:v1:<key>), and two warnings that mean it.
+Back:  the signing QR (stokvel:v1:<key>, or a link to the signing page with it after the #, which
+       browsers never send to the server), and two warnings that mean it.
 
 The quilt patch is the same algorithm as stage/lib/quilt.tsx, ported bit for bit, so a card and
 the dashboard draw the same patch for the same member.
@@ -221,6 +226,7 @@ def card_front(c: canvas.Canvas, x: float, y: float, number: str, name: str, col
 
 
 def card_back(c: canvas.Canvas, x: float, y: float, number: str, name: str, colour: str, qr_text: str, preview: bool):
+    phone = qr_text.startswith("http")
     c.setFillColor(PAPER)
     c.rect(x - BLEED, y - BLEED, CARD_W + 2 * BLEED, CARD_H + 2 * BLEED, stroke=0, fill=1)
 
@@ -241,7 +247,7 @@ def card_back(c: canvas.Canvas, x: float, y: float, number: str, name: str, colo
     c.setFont("GroteskBold", 10)
     c.drawString(tx, y + CARD_H - 10 * mm, f"{number}  {name}")
     c.setFont("Grotesk", 7)
-    c.drawString(tx, y + CARD_H - 14.5 * mm, "Scan at the signing station")
+    c.drawString(tx, y + CARD_H - 14.5 * mm, "Scan with your phone camera" if phone else "Scan at the signing station")
 
     c.setFillColor(DANGER)
     c.setFont("InterMedium", 7.2)
@@ -301,18 +307,25 @@ def build(cards: list[dict], pdf_path: Path, preview: bool):
     c.save()
 
 
-def make_cards(preview: bool) -> list[dict]:
+def make_cards(preview: bool, sign_url: str | None = None, existing: dict[str, str] | None = None) -> list[dict]:
+    """existing: label -> private key, to redraw the same cards instead of making new keys."""
+    if existing is not None:
+        new_key_for = lambda number: existing[number]  # noqa: E731
+    else:
+        new_key_for = lambda number: fake_key(number) if preview else new_key()  # noqa: E731
     cards = []
     for number, name, colour, turn in MEMBERS:
-        key = fake_key(number) if preview else new_key()
+        key = new_key_for(number)
         cards.append({"label": number, "name": name, "colour": colour, "line": f"Turn in rotation: {turn} of 6", "privateKey": key, "memberId": turn - 1})
     for number, name, colour, line in SPARES:
-        key = fake_key(number) if preview else new_key()
+        key = new_key_for(number)
         cards.append({"label": number, "name": name, "colour": colour, "line": line, "privateKey": key})
     number, name, colour, line = TREASURER
-    cards.append({"label": number, "name": name, "colour": colour, "line": line, "privateKey": fake_key(number) if preview else new_key()})
+    cards.append({"label": number, "name": name, "colour": colour, "line": line, "privateKey": new_key_for(number)})
     for card in cards:
         card["qr"] = f"stokvel:v1:{card['privateKey']}"
+        if sign_url:
+            card["qr"] = f"{sign_url.rstrip('#')}#{card['qr']}"
         card["address"] = None if preview else address_of(card["privateKey"])
     return cards
 
@@ -358,12 +371,31 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--preview", action="store_true", help="fake keys, previews into ../assets/cards")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--sign-url", default=None, help="print QRs as <url>#stokvel:v1:<key>, for phone cameras")
+    ap.add_argument("--from-keys", default=None, help="redraw cards.pdf from this keys.json instead of making new keys")
     args = ap.parse_args()
+
+    if args.from_keys:
+        src = Path(args.from_keys)
+        existing = {c["label"]: c["privateKey"] for c in json.loads(src.read_text())["cards"]}
+        out_dir = Path(args.out) if args.out else src.parent
+        cards = make_cards(False, args.sign_url, existing)
+        # the redraw must be the cards the contract was deployed with
+        members_file = src.parent / "members.json"
+        if members_file.exists():
+            deployed = json.loads(members_file.read_text())["keys"]
+            drawn = [c["address"] for c in cards if "memberId" in c]
+            if [a.lower() for a in deployed] != [a.lower() for a in drawn]:
+                raise SystemExit(f"{src} and {members_file} name different members; not redrawing")
+        pdf_path = out_dir / "cards.pdf"
+        build(cards, pdf_path, False)
+        print(f"redrew {pdf_path} from {src} ({len(cards)} cards, same keys; keys.json and members.json unchanged)")
+        return
 
     preview = args.preview
     out_dir = Path(args.out) if args.out else (ROOT / "assets" / "cards" if preview else HERE / "out")
     out_dir.mkdir(parents=True, exist_ok=True)
-    cards = make_cards(preview)
+    cards = make_cards(preview, args.sign_url)
     pdf_path = out_dir / ("preview-cards.pdf" if preview else "cards.pdf")
     build(cards, pdf_path, preview)
     print(f"wrote {pdf_path} ({len(cards)} cards, {math.ceil(len(cards) / (COLS * ROWS)) * 2} pages)")

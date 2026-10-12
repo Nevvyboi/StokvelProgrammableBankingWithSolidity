@@ -11,8 +11,8 @@ pane in PowerPoint). This is the full version to rehearse out loud. Stage direct
 *italics*. Demo cues are in `code` and match the buttons on `/presenter`. Lines marked ★ are the
 ones to keep even when everything else goes sideways. Don't read it word for word on the night.
 
-The safety line, said once, out loud, before the first demo: "Everything you see tonight is the
-Investec sandbox and a test network. There is no real money here and no real person's data."
+The safety line, said once, out loud, before the first demo: "Everything you see tonight is a
+simulated bank and a private test chain. There is no real money here and no real person's data."
 
 ---
 
@@ -151,7 +151,7 @@ twenty minutes.
 *Hand out the cards as they come up. Read the names off the cards: Lerato, Thabo, Aisha, Johan,
 Priya, Sipho. Give each person their number.*
 
-Before anything moves: everything you see tonight is the Investec sandbox and a test network.
+Before anything moves: everything you see tonight is a simulated bank and a private test chain.
 There is no real money here and no real person's data. These names are made up. These keys are
 worth nothing. Treat the card like cash anyway, because that's the habit we're teaching.
 
@@ -160,26 +160,29 @@ worth nothing. Treat the card like cash anyway, because that's the habit we're t
 This is the treasurer's book. Left page, the Investec account. Right page, the chain. Both of
 them live, both of them public.
 
-*Point at the signing station.*
+Committee, take out your phones. Turn your card over and point your camera at the QR on the
+back. Tap the link it offers.
 
-Lerato, come and be first. Turn your card over, hold the QR to the scanner.
+`Volunteers' phones: each opens /sign holding their card. Lerato's slip says "Lerato signs the
+constitution of The Q4 Stokvel."`
 
-`Signing station: scan card 01. The slip shows "Lerato signs the constitution of The Q4
-Stokvel." Press Sign.`
+Lerato, read me what your phone says.
+
+*She reads it.*
 
 Look at the sentence. Not a hex string. English. That's what her card is signing, and the
-contract only accepts it because that card is member one. Press the button.
+contract only accepts it because that card is member one. Press Sign.
 
-*Wait for the minute book line: "Member joined".*
+*Wait for the minute book line: "Member joined", and "✓ signed in" next to Lerato on the roster.*
 
-And there it is on the right page. Nobody typed her name in. The chain knows her from the
-signature.
+And there she is on the right page. Signed in. Nobody typed her name in. The chain knows her
+from the signature. Everybody else on the committee: Sign.
 
-*Get the other five through the station quickly. Talk over it.*
+*The other five land in a few seconds. Talk over it. If a phone won't scan, that card goes to
+the signing station at the side.*
 
-While the rest of the committee signs, everybody else: scan the QR on the screen. That's the
-audience page. Read only, same as the projector, and every line links to the block explorer. You
-don't have to take my word for any of this.
+While they sign, everybody else: scan the QR on the screen. That's the audience page. Read only,
+the same record the projector shows, live on your phone.
 
 ---
 
@@ -211,16 +214,12 @@ contract wrote it down. And look at the quilt.
 Every contribution adds a patch in that member's colour. It's a small thing, but I want the
 group's history to look like something the group made.
 
-If you're on the audience page, that event has a hash. Tap it. That's the contract, on a public
-test network, telling you what just happened, without me in the way.
+If you're on the audience page, that event has its transaction fingerprint next to it. That's
+the contract's record of what just happened, not mine.
 
-One honest note, because this is a room that will ask. Investec's sandbox is stateless. A
-transfer in the sandbox returns a real payment reference and then nothing changes. So there's a
-small proxy between the relayer and the sandbox. Every call goes through to Investec untouched.
-When the sandbox says yes to a transfer, the proxy writes that down under Investec's own reference,
-and the next time anyone asks for the balance, it adds it in. The sandbox forgets, the proxy
-remembers, and it never writes a rand the sandbox didn't accept first. The relayer can't tell,
-and that's the test.
+One honest note, because this is a room that will ask. The bank tonight is a mock of Investec's
+API, the same calls and the same shapes. The relayer can't tell the difference, and that's the
+test. The repo runs it against the real sandbox too.
 
 ---
 
@@ -403,10 +402,9 @@ a forty-message argument. Here it's a signature.
 
 *Turn to the volunteers.*
 
-I need four of you at the signing station. Any four. Scan your card, read the sentence, press
-Sign.
+Any four of you: scan your card again, read the sentence, press Sign.
 
-*As the first slip shows:*
+*As the first phone shows the slip:*
 
 Read it out for me, Thabo. *"Thabo approves: raise the contribution from R5,000 to R6,000."*
 That's the message. Not a hash, not a transaction blob. A sentence a person can read before they
@@ -447,13 +445,13 @@ Here, the committee can move Sipho's membership to a new card. Not the thief, th
 
 Four signatures again. Same as before.
 
-*Get four votes at the station, then execute.*
+*Four volunteers scan and sign on their phones, then execute.*
 
 `Presenter: DEMO 8, execute after the timelock.`
 
 Now, the thief. That's me, with the old card.
 
-`Signing station: scan the old card 06.`
+`Your phone: scan the old card 06.`
 
 *The slip says "Not a member". Show it.*
 
@@ -461,7 +459,7 @@ Now, the thief. That's me, with the old card.
 ever cast still counts, because votes are counted per member, not per card. But it will never
 sign as Sipho again.
 
-*Sipho scans 06b.*
+*Sipho scans 06b with a phone.*
 
 And Sipho, with the new card, is Sipho.
 
@@ -507,7 +505,9 @@ product. The real version is a proper club account.
 There's no tokenised rand here, on purpose. The day there is one that a bank stands behind,
 the bank half of this gets simpler.
 
-And these cards should be passkeys. A phone that signs, not a QR you can photograph.
+And these cards should be passkeys. Tonight you scanned a key into a website. That is exactly
+what a crypto scam looks like, and in real life you never do it. A phone that signs, not a QR
+you can photograph.
 
 *Credits.*
 

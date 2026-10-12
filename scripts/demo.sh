@@ -40,9 +40,16 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
+# each service in its own process group, so cleanup can kill the group. macOS has no setsid;
+# perl's setpgrp then exec keeps the same pid, so $! is the group id cleanup kills. (Not through a
+# shell function: & would fork a subshell, and $! would be that, not the group.)
 run() { # name, command...
   local name=$1; shift
-  setsid "$@" > ".demo/$name.log" 2>&1 < /dev/null &
+  if command -v setsid >/dev/null; then
+    setsid "$@" > ".demo/$name.log" 2>&1 < /dev/null &
+  else
+    perl -e 'setpgrp(0, 0); exec @ARGV or die "exec $ARGV[0]: $!"' -- "$@" > ".demo/$name.log" 2>&1 < /dev/null &
+  fi
   echo $! >> .demo/pids
 }
 
