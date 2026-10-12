@@ -5,9 +5,14 @@ import { MEMBERS, formatRands, short } from "./members";
 
 export const ANVIL_MNEMONIC = "test test test test test test test test test test test junk";
 
-/** What a member card's QR holds: a version tag and a throwaway testnet key. Nothing else. */
+/**
+ * What a member card's QR holds: a version tag and a throwaway testnet key, nothing else. Printed
+ * as a link to /sign with the key after the #, so a phone camera opens the signing page holding
+ * the card; the part after # never leaves the phone. A bare "stokvel:v1:0x…" or "0x…" works too.
+ */
 export function parseCardQr(text: string): `0x${string}` | null {
-  const t = text.trim();
+  let t = text.trim();
+  if (t.includes("#")) t = decodeURIComponent(t.slice(t.lastIndexOf("#") + 1));
   const m = /^stokvel:v1:(0x[0-9a-fA-F]{64})$/.exec(t) ?? /^(0x[0-9a-fA-F]{64})$/.exec(t);
   return m ? (m[1] as `0x${string}`) : null;
 }

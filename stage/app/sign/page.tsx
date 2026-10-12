@@ -12,8 +12,10 @@ import { stokvelAbi } from "@/lib/abi";
 type Phase = { step: "scan" } | { step: "holding"; address: string; memberId: number | null } | { step: "done"; ok: boolean; text: string; hash?: string };
 
 /**
- * The signing station: a slip of paper on the table. Scan a card (webcam, or a USB scanner that
- * types), read the sentence, press Sign, and the key is dropped from memory. It never leaves this page.
+ * The signing slip. A volunteer's phone camera opens it straight from the card's QR (the key rides
+ * after the #, which browsers never send to the server); or the station at the side of the stage
+ * scans the card (webcam, or a USB scanner that types). Read the sentence, press Sign, and the key
+ * is dropped from memory. It never leaves this page.
  */
 export default function Sign() {
   const s = useStage({ poll: 2500 });
@@ -25,6 +27,20 @@ export default function Sign() {
   const keyRef = useRef<`0x${string}` | null>(null);
   const wedge = useRef("");
   const videoRef = useRef<HTMLVideoElement>(null);
+  // a card opened from the phone camera: take the key out of the address bar at once, so it isn't
+  // left in the tab or the history, and hold it until the chain client is ready
+  const fromLink = useRef<`0x${string}` | null | undefined>(undefined);
+  if (fromLink.current === undefined && typeof window !== "undefined") {
+    fromLink.current = window.location.hash ? parseCardQr(window.location.href) : null;
+  }
+  // after hydration, or the router puts the URL it started with (key and all) back
+  useEffect(() => {
+    if (!window.location.hash) return;
+    const clean = window.location.pathname + window.location.search;
+    window.history.replaceState(window.history.state, "", clean);
+    const t = setTimeout(() => window.location.hash && window.history.replaceState(window.history.state, "", clean), 500);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     fetch("/api/constitution").then((r) => r.json()).then((d) => setConstitution(d.text));
@@ -41,6 +57,14 @@ export default function Sign() {
     },
     [s.client, s.cfg],
   );
+
+  useEffect(() => {
+    if (fromLink.current && s.client && s.cfg) {
+      const key = fromLink.current;
+      fromLink.current = null;
+      acceptKey(key);
+    }
+  }, [s.client, s.cfg, acceptKey]);
 
   // a USB scanner acts as a keyboard: it types the QR text fast and presses Enter
   useEffect(() => {
@@ -125,7 +149,7 @@ export default function Sign() {
         r = await relayerPost(s.cfg, "/votes", { proposalId: proposal!.id.toString(), nonce: nonce.toString(), signature: await signVote(account, s.cfg, proposal!.id, nonce) });
       }
       wipe();
-      setPhase({ step: "done", ok: r.ok, text: r.ok ? "Signed. The key is gone from this station." : `Refused: ${r.error}`, hash: r.hash });
+      setPhase({ step: "done", ok: r.ok, text: r.ok ? "Signed. The key is gone from this page. Scan your card again when there's a vote." : `Refused: ${r.error}`, hash: r.hash });
     } catch (err) {
       wipe();
       setPhase({ step: "done", ok: false, text: String(err).split("\n")[0]! });
@@ -141,26 +165,26 @@ export default function Sign() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl flex-col px-8 pb-10 pt-8">
+    <main className="mx-auto flex min-h-screen max-w-4xl flex-col px-4 pb-10 pt-6 sm:px-8 sm:pt-8">
       <header className="page">
         <div className="running-head">
           <span>
             <b>Signing station</b> · The Q4 Stokvel
           </span>
-          <span className="font-mono text-sm">keys stay on this screen</span>
+          <span className="font-mono hidden text-sm sm:inline">keys stay on this screen</span>
         </div>
       </header>
 
       {phase.step === "scan" && (
         <section className="mt-10 flex flex-1 flex-col">
-          <h1 className="font-display text-5xl font-medium leading-tight">Hold the back of your card to the scanner.</h1>
-          <p className="mt-4 text-xl text-muted">The scanner types it in for you. No camera? Use the webcam below.</p>
+          <h1 className="font-display text-3xl font-medium leading-tight sm:text-5xl">Scan the back of your card with your phone camera.</h1>
+          <p className="mt-4 text-lg text-muted sm:text-xl">Or hold it to the scanner here, which types it in for you, or use the camera below.</p>
           <div className="mt-10 flex flex-col gap-6">
             {camera ? (
               <video ref={videoRef} className="w-full max-w-md border border-line" muted playsInline />
             ) : (
               <button className="w-fit border border-text px-6 py-3 text-lg hover:bg-surface" onClick={() => setCamera(true)}>
-                Use the webcam
+                Use the camera
               </button>
             )}
             <input
@@ -179,10 +203,10 @@ export default function Sign() {
       )}
 
       {holding && (
-        <section className="mt-8 flex flex-1 flex-col">
+        <section className="mt-6 flex flex-1 flex-col sm:mt-8">
           {/* the slip */}
-          <div className="bg-paper px-10 py-9 text-ink">
-            <div className="flex items-center gap-5 border-b border-ink/20 pb-5">
+          <div className="bg-paper px-5 py-6 text-ink sm:px-10 sm:py-9">
+            <div className="flex flex-wrap items-center gap-4 border-b border-ink/20 pb-5 sm:gap-5">
               {memberInfo ? (
                 <>
                   <Patch colour={memberInfo.colour} seed={`member:${memberInfo.number}`} size={64} base="#e9e4d8" />
@@ -197,7 +221,7 @@ export default function Sign() {
                   <div className="font-display text-4xl font-medium text-danger">Not a member</div>
                 </div>
               )}
-              <div className="font-mono ml-auto text-xs text-ink/50">{holding.address}</div>
+              <div className="font-mono w-full break-all text-xs text-ink/50 sm:ml-auto sm:w-auto">{holding.address}</div>
             </div>
 
             {!needsJoin && memberInfo && openProposals.length > 1 && (
@@ -211,7 +235,7 @@ export default function Sign() {
             )}
 
             <div className="mt-7 text-sm text-ink/60">You are signing</div>
-            <div className="font-display mt-2 text-[2.6rem] font-medium leading-tight">{message}</div>
+            <div className="font-display mt-2 text-[1.9rem] font-medium leading-tight sm:text-[2.6rem]">{message || "Reading the contract…"}</div>
             {proposal && !needsJoin && (
               <div className="font-mono mt-5 text-sm text-ink/60">
                 EIP-712 · Vote(proposalId {proposal.id.toString()}, nonce next) · {proposal.yes} of 6 have signed
@@ -222,11 +246,11 @@ export default function Sign() {
             </div>
           </div>
 
-          <div className="mt-6 flex gap-4">
-            <button onClick={sign} disabled={!canSign} className="font-display flex-1 bg-text py-6 text-4xl font-medium text-ink disabled:opacity-30">
+          <div className="mt-6 flex gap-3 sm:gap-4">
+            <button onClick={sign} disabled={!canSign} className="font-display flex-1 bg-text py-5 text-3xl font-medium text-ink disabled:opacity-30 sm:py-6 sm:text-4xl">
               {busy ? "Signing…" : "Sign"}
             </button>
-            <button onClick={reset} className="border border-line px-8 text-xl text-muted hover:border-text">
+            <button onClick={reset} className="border border-line px-5 text-lg text-muted hover:border-text sm:px-8 sm:text-xl">
               Cancel
             </button>
           </div>
@@ -235,9 +259,9 @@ export default function Sign() {
 
       {phase.step === "done" && (
         <section className="mt-10 flex flex-1 flex-col items-start">
-          <div className={`stamp text-6xl ${phase.ok ? "text-success" : "text-danger"}`}>{phase.ok ? "Signed" : "Refused"}</div>
-          <p className="mt-8 max-w-2xl text-2xl">{phase.text}</p>
-          {phase.hash && <p className="font-mono mt-3 text-sm text-muted">{phase.hash}</p>}
+          <div className={`stamp text-5xl sm:text-6xl ${phase.ok ? "text-success" : "text-danger"}`}>{phase.ok ? "Signed" : "Refused"}</div>
+          <p className="mt-8 max-w-2xl text-xl sm:text-2xl">{phase.text}</p>
+          {phase.hash && <p className="font-mono mt-3 break-all text-sm text-muted">{phase.hash}</p>}
           <button onClick={reset} className="mt-10 border border-text px-8 py-4 text-xl hover:bg-surface">
             Next card
           </button>

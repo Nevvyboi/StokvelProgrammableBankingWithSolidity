@@ -151,7 +151,7 @@ def head(left: str, right: str = "") -> str:
 
 def divider(n: int, title: str, promise: str, cut: bool = False) -> str:
     strip = "".join(patch_svg(c, f"member:{num}", 46, "quilt-in") for num, _, c in MEMBERS)
-    return (head(f"Demo {n}", "live · sandbox and testnet only" + (" · ✂ can be cut" if cut else ""))
+    return (head(f"Demo {n}", "live · simulated bank, private test chain" + (" · ✂ can be cut" if cut else ""))
             + f'<div class="demo-no">DEMO {n}</div><h2 class="demo-title">{title}</h2><p class="promise">{promise}</p><div class="strip">{strip}</div>')
 
 
@@ -211,7 +211,7 @@ def build() -> str:
     slides.append(f'<div class="diagram-wrap">{svg_inline("pattern")}</div>')
     slides.append(f'<div class="diagram-wrap hash">{svg_inline("hash-chain")}</div>')
 
-    slides.append(divider(1, "The committee", "Six volunteers, six cards, one constitution. Nobody types a name in: the chain knows each member from a signature."))
+    slides.append(divider(1, "The committee", "Six volunteers, six cards, six phones, one constitution. Nobody types a name in: the chain knows each member from a signature."))
     slides.append(divider(2, "Swipe and round-up", "Aisha buys R87 of bread. The card rounds up to R90 and R3 lands on chain with her number on it."))
     slides.append(head("The whole payout rule", "contracts/src/Stokvel.sol") + code_html(CLOSE_ROUND, {2, 3, 4, 5, 6, 8}) + '<p class="caption">No function takes a recipient. <code>round % 6</code>, always.</p>')
     slides.append(divider(3, "Month end", "The contract says who. Investec pays through the API. The chain records the bank's own payment reference."))

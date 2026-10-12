@@ -35,12 +35,18 @@ export function createReservesLoop(o: {
       publicClient.getBlock(),
       contract.read.reservesAt(),
     ]);
-    const cents = randsToCents(balance.currentBalance);
+    // an overdrawn account holds nothing for the club: attest zero rather than a negative number,
+    // which the contract's uint can't take (and which would stop every attestation after it)
+    const raw = randsToCents(balance.currentBalance);
+    const cents = raw < 0n ? 0n : raw;
     const at = block.timestamp;
     if (at <= BigInt(last)) return { posted: false, cents, at, reason: "no new block since last attestation" };
     const sig = await sign(cents, at);
     try {
       const hash = await contract.write.postReserves([cents, at, sig]);
+      // wait until it's mined: the tick that follows tries to close the round against it, and an
+      // attestation still in the mempool reads as ReservesStale instead of the real answer
+      await publicClient.waitForTransactionReceipt({ hash, timeout: 30_000 });
       const owed = (await contract.read.pot()) + (await contract.read.unsettled());
       log.info({ cents: String(cents), owed: String(owed), at: String(at), hash }, "postReserves");
       feed.push({

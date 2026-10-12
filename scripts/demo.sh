@@ -40,9 +40,16 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
+# each service in its own process group, so cleanup can kill the group. macOS has no setsid;
+# perl's setpgrp then exec keeps the same pid, so $! is the group id cleanup kills. (Not through a
+# shell function: & would fork a subshell, and $! would be that, not the group.)
 run() { # name, command...
   local name=$1; shift
-  setsid "$@" > ".demo/$name.log" 2>&1 < /dev/null &
+  if command -v setsid >/dev/null; then
+    setsid "$@" > ".demo/$name.log" 2>&1 < /dev/null &
+  else
+    perl -e 'setpgrp(0, 0); exec @ARGV or die "exec $ARGV[0]: $!"' -- "$@" > ".demo/$name.log" 2>&1 < /dev/null &
+  fi
   echo $! >> .demo/pids
 }
 
@@ -128,8 +135,9 @@ cat <<EOF
   projector      http://localhost:3000/
   signing        http://localhost:3000/sign
   audience       http://localhost:3000/watch
-  presenter      http://localhost:3000/presenter#k=$PRESENTER_TOKEN
-                 (keep this one off the projector; the token is new every run)
+  run sheet      http://localhost:3000/#k=$PRESENTER_TOKEN
+                 (the projector page with the card keys loaded; the run sheet is the
+                 sidebar, D or the tab on the right. The token is new every run)
 
   relayer        http://localhost:4000/health
   bank           http://localhost:$BANK_PORT/__mock/state   ($MODE)

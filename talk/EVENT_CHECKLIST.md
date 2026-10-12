@@ -56,10 +56,10 @@ Said once, out loud, before DEMO 1, every time:
 
 | When | What |
 |---|---|
-| Morning | Fresh clone, `./scripts/demo.sh --mock`, every demo once from the presenter panel. Charge everything |
+| Morning | Fresh clone, `./scripts/demo.sh --mock`, every demo once from the run sheet. Charge everything |
 | 2 hours before | Arrive. Projector: plug in, fullscreen the dashboard, check it reads from the back row. Fix the font size in the browser zoom if it doesn't |
 | 90 minutes before | Hotspot up, laptop and signing device on it. Scanner test with card 01 on the signing station. Fallback mode toggled on and off once |
-| 60 minutes before | Restart the stack clean (`Ctrl-C`, then `./scripts/demo.sh --mock`). Leave it running. Don't touch the presenter panel again until the talk |
+| 60 minutes before | Restart the stack clean (`Ctrl-C`, then `./scripts/demo.sh --mock`). Leave it running. Don't touch the run sheet again until the talk |
 | 30 minutes before | Cards, lanyards, hat and run sheet on the lectern. Recording open on the desktop, paused at chapter 1 |
 | 10 minutes before | Pick six volunteers if the organiser lets you, so the DEMO 1 handout is quick |
 | 0:00 | Card in hand. Walk on |
