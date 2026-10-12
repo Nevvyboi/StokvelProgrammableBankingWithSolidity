@@ -4,7 +4,6 @@
 # can, after every setup.sh and again on the day.
 #
 #   ./deploy/check.sh https://stokvel.example.com
-#   PRESENTER_USER=presenter PRESENTER_PASS=... ./deploy/check.sh https://stokvel.example.com
 #
 # Exits non-zero if anything is wrong. Needs curl only.
 set -uo pipefail
@@ -32,23 +31,10 @@ expect 200 "relayer feed"             "$BASE/relayer/feed"
 expect 200 "relayer bank"             "$BASE/relayer/bank"
 expect 200 "relayer health"           "$BASE/relayer/health"
 
-echo "presenter only, must ask for the password"
-expect 401 "presenter login"          "$BASE/presenter"
-expect 401 "card keys"                "$BASE/api/keys"
-expect 401 "relayer admin (clock)"    -X POST "$BASE/relayer/admin/warp"
-expect 401 "relayer admin (kill)"     -X POST "$BASE/relayer/admin/kill"
-expect 401 "relayer propose"          -X POST "$BASE/relayer/propose"
-expect 401 "relayer execute"          -X POST "$BASE/relayer/execute"
-expect 401 "bank webhook"             -X POST "$BASE/relayer/webhook/transaction"
-expect 401 "mock bank: steal"         -X POST "$BASE/mock/__mock/steal"
-expect 401 "mock bank: state"         "$BASE/mock/__mock/state"
-
-if [[ -n ${PRESENTER_USER:-} && -n ${PRESENTER_PASS:-} ]]; then
-  echo "with the presenter login"
-  expect 307 "presenter login, back to the board" -u "$PRESENTER_USER:$PRESENTER_PASS" "$BASE/presenter"
-  expect 403 "card keys stay off"     -u "$PRESENTER_USER:$PRESENTER_PASS" "$BASE/api/keys"
-  expect 200 "mock bank state"        -u "$PRESENTER_USER:$PRESENTER_PASS" "$BASE/mock/__mock/state"
-fi
+echo "the run sheet: no logins, by choice; the card keys stay off the server"
+expect 200 "mock bank state, read by the run sheet" "$BASE/mock/__mock/state"
+expect 403 "card keys stay off"       "$BASE/api/keys"
+expect 404 "no presenter page"        "$BASE/presenter"
 
 echo "the chain, through the read-only proxy"
 cfg=$(curl -s --max-time 10 "$BASE/api/config")

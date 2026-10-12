@@ -41,6 +41,9 @@ export function createReservesLoop(o: {
     const sig = await sign(cents, at);
     try {
       const hash = await contract.write.postReserves([cents, at, sig]);
+      // wait until it's mined: the tick that follows tries to close the round against it, and an
+      // attestation still in the mempool reads as ReservesStale instead of the real answer
+      await publicClient.waitForTransactionReceipt({ hash, timeout: 30_000 });
       const owed = (await contract.read.pot()) + (await contract.read.unsettled());
       log.info({ cents: String(cents), owed: String(owed), at: String(at), hash }, "postReserves");
       feed.push({

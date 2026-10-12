@@ -25,7 +25,7 @@ room.
 |---|---|---|
 | 1 committee | A phone won't scan the card, or won't open the link | That card goes to the signing station at the side: the USB scanner reads the same QR. Or the paste box on `/sign`. Locally, the run sheet's "signs" button too (on the server it has none: the card keys aren't there) |
 | 1 committee | The relayer refuses (NotMember) | Wrong deck of cards for this deployment. Use "all six" in the run sheet (it uses the deployed keys) and carry on; the cards still work for the vote story if you swap to the presenter's vote buttons |
-| 2 swipe | Nothing lands on the statement | Presenter, "before DEMO 3": any "pays" button posts a plain credit with the reference. Say "the card code's in the repo, this is the same transfer by hand" |
+| 2 swipe | Nothing lands on the statement | Run sheet: `pay <name>` posts a plain credit with the reference. Say "the card code's in the repo, this is the same transfer by hand" |
 | 2 swipe | The chain event never comes | Header says relayer down. Wait five seconds. If still down, fallback mode step 2 |
 | 3 month end | RoundStillOpen | On Anvil: press "Run the loops now" once more. On Base Sepolia: fallback mode step 4 |
 | 3 month end | Payout never settles | Mock bank is down. Fallback mode step 4 |
@@ -46,7 +46,7 @@ uses Anvil's public test accounts as the members and the panel signs with those.
 
 ## The order of switching
 
-1. The demo fails once. Say the line. Press the button that does the same thing from the presenter
+1. The demo fails once. Say the line. Type the command that does the same thing in the run sheet, from the
    panel (the table above).
 2. That fails too. Switch the dashboard to fallback mode and step the script.
 3. The laptop is the problem. Open the recording at the chapter for this demo.
@@ -62,8 +62,7 @@ switch to the laptop's `demo.sh`, the phones still go to the server, so sign at 
 ## Before you walk on
 
 - `./scripts/demo.sh --mock` running, all four URLs answering.
-- The projector page open in a full-screen browser, the run sheet unlocked (on the server: open
-  `/presenter` once and log in; it brings you back with the sidebar open).
+- The projector page open in a full-screen browser; D opens the run sheet over it.
 - Fallback mode tested once today: toggle on, step twice, toggle off, reload.
 - The recording on the desktop, chapter marks checked.
 - Phone hotspot on, laptop connected to it, not the venue wifi.

@@ -81,7 +81,6 @@ if [[ $fresh -eq 1 ]]; then
   Fill them in (deploy/README.md, step 6), then run this script again:
 
     sudo nano $ETC/stokvel.env
-    caddy hash-password          # paste the result into PRESENTER_HASH
     sudo nano $ETC/caddy.env
     sudo $APP/deploy/setup.sh
 
@@ -91,7 +90,7 @@ fi
 # refuse to start half configured: an empty key or an unhashed password is a broken talk
 missing=()
 for v in RPC_URL RELAYER_PK ATTESTOR_PK SPARE_ADDRESS; do grep -qE "^$v=.+" "$ETC/stokvel.env" || missing+=("stokvel.env: $v"); done
-for v in STOKVEL_DOMAIN ACME_EMAIL PRESENTER_USER PRESENTER_HASH; do grep -qE "^$v=.+" "$ETC/caddy.env" || missing+=("caddy.env: $v"); done
+for v in STOKVEL_DOMAIN ACME_EMAIL; do grep -qE "^$v=.+" "$ETC/caddy.env" || missing+=("caddy.env: $v"); done
 grep -q "YOUR_KEY\|example.com" "$ETC/stokvel.env" "$ETC/caddy.env" && missing+=("a placeholder (YOUR_KEY or example.com) is still in $ETC")
 if [[ ${#missing[@]} -gt 0 ]]; then
   printf '  not filled in yet:\n'; printf '    %s\n' "${missing[@]}"; exit 1

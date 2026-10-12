@@ -18,18 +18,8 @@
 		-Server
 	}
 
-	# Everything only the presenter may touch: the run sheet, the relayer's admin and proposal
-	# routes, the mock bank's levers (steal, swipe, refund) and the card keys. Password protected.
-	# The few relayer routes the public pages need are carved out:
-	#   GET  feed, bank, health, nonce   what the projector, the phones and /sign read
-	#   POST join, votes                 a member's signature; the contract checks it, not us
-	@private {
-		path /presenter /presenter/* /relayer/* /mock/* /api/keys
-		not path /relayer/feed /relayer/bank /relayer/health /relayer/nonce/* /relayer/join /relayer/votes
-	}
-	basic_auth @private {
-		{$PRESENTER_USER} {$PRESENTER_HASH}
-	}
+	# No logins: a one-off talk, nothing real behind it, and the run sheet on the projector page
+	# pulls the levers. The card keys are never on the server (DEMO_MODE=false).
 
 	handle_path /relayer/* {
 		reverse_proxy 127.0.0.1:4000
@@ -37,7 +27,7 @@
 	handle_path /mock/* {
 		reverse_proxy 127.0.0.1:4100
 	}
-	# the stage app: the projector (/), /sign, /watch, /presenter and its read-only chain proxy (/api/rpc)
+	# the stage app: the projector (/, with the run sheet), /sign, /watch and the read-only chain proxy (/api/rpc)
 	handle {
 		reverse_proxy 127.0.0.1:3000
 	}

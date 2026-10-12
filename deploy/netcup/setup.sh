@@ -15,7 +15,6 @@ set -euo pipefail
 DOMAIN=${DOMAIN:-stokvel.nevvy.studio}
 REPO_URL=${REPO_URL:-https://github.com/Nevvyboi/StokvelProgrammableBankingWithSolidity.git}
 BRANCH=${BRANCH:-main}
-PRESENTER_USER=${PRESENTER_USER:-presenter}
 APP=/opt/stokvel
 ETC=/etc/stokvel
 # DataBrew's, never ours: read, and changed only by the one marked include line
@@ -219,14 +218,7 @@ echo "  $DOMAIN → $me"
 step "nginx: our server block, included from $SITE"
 [[ -f $NGINX_CONF.bak-stokvel ]] || cp -p "$NGINX_CONF" "$NGINX_CONF.bak-stokvel"
 install -d -m 755 "$SITE"
-if [[ ! -f $SITE/htpasswd ]]; then
-  pass=${PRESENTER_PASS:-}
-  if [[ -z $pass ]]; then read -rsp "  presenter password for $PRESENTER_USER: " pass; echo; fi
-  [[ ${#pass} -ge 12 ]] || die "use a presenter password of at least 12 characters"
-  # apr1: nginx checks it itself, whatever the container's libc supports
-  printf '%s:%s\n' "$PRESENTER_USER" "$(openssl passwd -apr1 "$pass")" > "$SITE/htpasswd"
-  chmod 644 "$SITE/htpasswd"   # the nginx workers (uid 101 in the container) read it
-fi
+rm -f "$SITE/htpasswd"   # no logins any more (an older setup.sh made one)
 have_cert=0; [[ -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem ]] && have_cert=1
 { render "$HERE/nginx-http.conf"; [[ $have_cert -eq 1 ]] && render "$HERE/nginx-https.conf"; } > "$SITE/site.conf"
 include_on
@@ -261,7 +253,7 @@ cat <<EOF
 
   Done. From your laptop, check what the public can and can't reach:
 
-    PRESENTER_USER=$PRESENTER_USER PRESENTER_PASS=... ./deploy/check.sh https://$DOMAIN
+    ./deploy/check.sh https://$DOMAIN
 
   Logs:  journalctl -u stokvel-relayer -f   (or stokvel-stage, stokvel-mock)
   Off again, completely:  $HERE/teardown.sh

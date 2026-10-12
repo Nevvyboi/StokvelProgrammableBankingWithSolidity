@@ -136,7 +136,7 @@ can't be warped.
 
 **Your own server and domain.** `localhost` only works on your laptop, and venue Wi-Fi usually
 won't let phones reach it. [`deploy/README.md`](deploy/README.md) puts the screens on a small
-server behind HTTPS, with the run sheet behind a password and the chain read through a
+server behind HTTPS, with the run sheet open (no logins, a one-off talk) and the chain read through a
 read-only proxy, then checks all of it from the outside.
 
 **The card.** `card/main.js` and a filled in `card/env.json` go into the Investec card IDE. It only

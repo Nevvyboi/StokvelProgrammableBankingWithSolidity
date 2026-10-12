@@ -18,14 +18,11 @@ const H = 1080;
 // what's left for a focused section: the board minus its padding and the header
 const FOCUS_W = W - 80;
 const FOCUS_H = H - 150;
-// the run sheet's width; the board shrinks to the rest of the window while it's open
-const SIDEBAR = 420;
-
-function useFit(reserve: number) {
+function useFit() {
   const [fit, setFit] = useState({ k: 1, x: 0, y: 0 });
   useEffect(() => {
     const f = () => {
-      const w = window.innerWidth - reserve;
+      const w = window.innerWidth;
       const k = Math.min(w / W, window.innerHeight / H);
       setFit({ k, x: (w - W * k) / 2, y: (window.innerHeight - H * k) / 2 });
     };
@@ -39,7 +36,7 @@ function useFit(reserve: number) {
       ro.disconnect();
       window.removeEventListener("resize", f);
     };
-  }, [reserve]);
+  }, []);
   return fit;
 }
 
@@ -54,28 +51,18 @@ function Dashboard() {
   const params = useSearchParams();
   const [fallback, setFallback] = useState(false);
   const [focus, setFocus] = useState<Focus | null>(null);
-  // the run sheet: always there locally; on a server only after /presenter's login sent us back
-  // with ?controls=1 (its levers are behind the presenter password either way)
-  const [unlocked, setUnlocked] = useState(false);
+  // the run sheet: a console that floats over the board (D, or the tab on the right edge)
   const [sidebar, setSidebar] = useState(false);
   useEffect(() => {
     const fromUrl = params.get("fallback") === "1";
     let stored = false;
     try {
       stored = localStorage.getItem("stokvel:fallback") === "1";
-      if (params.get("controls") === "1") {
-        sessionStorage.setItem("stokvel:controls", "1");
-        setSidebar(true);
-        history.replaceState(history.state, "", window.location.pathname + window.location.hash);
-      }
-      if (sessionStorage.getItem("stokvel:controls") === "1") setUnlocked(true);
     } catch {}
     setFallback(fromUrl || stored);
   }, [params]);
   const s = useStage({ fallback });
-  const local = !!s.cfg && /^https?:/.test(s.cfg.relayerUrl);
-  const controls = unlocked || local;
-  const fit = useFit(controls && sidebar ? SIDEBAR : 0);
+  const fit = useFit();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -84,28 +71,24 @@ function Dashboard() {
         else setFocus(null);
       }
       if (e.key === "0") setFocus(null);
-      if ((e.key === "d" || e.key === "D") && controls) setSidebar((o) => !o);
+      if (e.key === "d" || e.key === "D") setSidebar((o) => !o);
       const f = FOCUS.find((x) => x.key === e.key);
       if (f) setFocus((cur) => (cur === f.id ? null : f.id));
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [s, controls]);
+  }, [s]);
 
   const label = focus ? FOCUS.find((f) => f.id === focus)!.label : null;
   const zoomable = (id: Focus) => ({ onClick: () => setFocus(id), className: "cursor-zoom-in", title: "Click, or press its number, to fill the screen" });
 
   return (
     <div className="fixed inset-0 overflow-hidden">
-      {controls && (
-        <>
-          <ControlSidebar s={s} open={sidebar} onClose={() => setSidebar(false)} focus={focus} setFocus={setFocus} fallback={fallback} setFallback={setFallback} />
-          {!sidebar && (
-            <button onClick={() => setSidebar(true)} className="font-mono fixed right-0 top-1/2 z-40 -translate-y-1/2 border border-r-0 border-line bg-bg px-2 py-3 text-xs text-muted hover:text-text [writing-mode:vertical-rl]" title="Open the run sheet (D)">
-              ◂ run sheet
-            </button>
-          )}
-        </>
+      <ControlSidebar s={s} open={sidebar} onClose={() => setSidebar(false)} setFocus={setFocus} setFallback={setFallback} />
+      {!sidebar && (
+        <button onClick={() => setSidebar(true)} className="font-mono fixed right-0 top-1/2 z-40 -translate-y-1/2 border border-r-0 border-line bg-bg px-2 py-3 text-xs text-muted hover:text-text [writing-mode:vertical-rl]" title="Open the run sheet (D)">
+          ◂ run sheet
+        </button>
       )}
       <div style={{ width: W, height: H, transform: `translate(${fit.x}px, ${fit.y}px) scale(${fit.k})`, transformOrigin: "top left" }}>
         <main className="flex h-full flex-col overflow-hidden px-10 pb-5 pt-6">

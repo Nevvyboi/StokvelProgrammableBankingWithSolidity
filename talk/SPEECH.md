@@ -8,14 +8,14 @@ minute slot; together they take out five minutes.
 
 **How to use this:** the deck carries the short notes (press N in the HTML deck, or read the notes
 pane in PowerPoint). This is the full version to rehearse out loud. Stage directions are in
-*italics*. Demo cues are in `code` and match the buttons in the run sheet, the sidebar on the
-projector page (D, or the tab on its right edge). The room sees each button's command as you
-press it, and the board change next to it. Lines marked ★ are the
+*italics*. Demo cues are in `code`: `Run sheet: monthend` means type `monthend` into the run
+sheet, the console that slides over the projector page (D, or the tab on its right edge). The room
+sees what you typed, the calls it makes, and the board change behind it. `help` lists everything. Lines marked ★ are the
 ones to keep even when everything else goes sideways. Don't read it word for word on the night.
 
-**Zoom the projector** when a moment needs the room to read it: the run sheet's "Screen" row
-has a button per section (1 bank statement, 2 pot and reconciliation, 3 roster, 4 minute book,
-5 quilt) and "Everything"; on the projector itself, the same number keys, a click, or Esc. Good
+**Zoom the projector** when a moment needs the room to read it: `zoom roster` (or bank, pot,
+minutes, quilt, all) in the run sheet; with the run sheet closed, the keys 1 to 5 and 0, a click,
+or Esc. Good
 moments: 3 while the committee signs in, 1 when the R3 lands, 2 for FROZEN.
 
 The safety line, said once, out loud, before the first demo: "Everything you see tonight is a
@@ -199,7 +199,7 @@ the same record the projector shows, live on your phone.
 
 Aisha, you're going to buy something. R87 at the bakery.
 
-`Run sheet: DEMO 2, "Aisha swipes R87 at the bakery".`
+`Run sheet: swipe aisha 87`
 
 That button runs the actual card code, the file called main.js, the way Investec's card runtime
 would run it. It's about sixty lines, and it's in the repo. After the transaction goes through,
@@ -258,7 +258,7 @@ treasurer, not me, not the person who deployed it. The order is the order.
 
 Let's get everybody paid up for the month.
 
-`Run sheet: "before DEMO 3", click through the remaining members.`
+`Run sheet: pay all`
 
 *Roster fills with PAID stamps.*
 
@@ -268,7 +268,7 @@ the reconciliation line says the bank holds exactly that, signed. Covered.
 Now, it's the twenty-third of December, and I can't make you sit here until then, so on this
 local chain I'm allowed to move the clock.
 
-`Run sheet: DEMO 3, "Skip to month end and settle".`
+`Run sheet: monthend`
 
 *Talk through the minute book as the lines arrive.*
 
@@ -299,8 +299,7 @@ what happens when they do?
 
 *Get the next month paid quickly, then steal.*
 
-`Run sheet: "before DEMO 3" buttons again for the new month, then DEMO 4, "Take R1,000 out,
-then attest".`
+`Run sheet: pay all, then steal 1000`
 
 I've just moved a thousand rand from the stokvel account to my personal account, and I've
 labelled it "Admin fees". Very professional.
@@ -315,7 +314,7 @@ reconciliation.
 Bank holds twenty-nine thousand. Club is owed thirty. Short. And now let's try to close the
 month.
 
-`Run sheet: DEMO 4, "Try to close the round".`
+`Run sheet: close`
 
 *The screen goes red. FROZEN.*
 
@@ -327,7 +326,7 @@ money goes missing quietly.
 
 *Take the hat off.*
 
-`Run sheet: DEMO 4, "Put it back".`
+`Run sheet: putback`
 
 The money goes back, the next attestation shows it, the round closes. The club moves on. The
 treasurer, we'll deal with later.
@@ -350,7 +349,7 @@ one line. In version one, this line isn't there.
 
 Let's see what one line is worth. Version one first.
 
-`Run sheet: DEMO 5, "V1: same transaction twice".`
+`Run sheet: double v1`
 
 Same bank transaction, sent twice. Version one records it twice. Priya has now paid ten thousand
 rand this month according to the chain, and five according to the bank. Two months from now,
@@ -358,7 +357,7 @@ she'd be paid out of money that doesn't exist.
 
 Version two.
 
-`Run sheet: DEMO 5, "V2: same webhook twice".`
+`Run sheet: double v2`
 
 *The screen goes red. REFUSED.*
 
@@ -405,7 +404,7 @@ Let a machine try to make it false.
 The stokvel wants to raise the contribution. Five thousand to six. In a WhatsApp group this is
 a forty-message argument. Here it's a signature.
 
-`Run sheet: DEMO 7, "Propose R5,000 to R6,000".`
+`Run sheet: propose raise`
 
 *Turn to the volunteers.*
 
@@ -425,7 +424,7 @@ signed at eleven at night can still be looked at in the morning.
 
 *Skip the timelock and execute.*
 
-`Run sheet: DEMO 7, "Execute".`
+`Run sheet: execute`
 
 Executed. The contribution is six thousand. And that same vote signed twice? Let's not even try
 it, there's a nonce in the signature, the second copy is dead on arrival. We tested it.
@@ -446,7 +445,7 @@ everything.
 
 Here, the committee can move Sipho's membership to a new card. Not the thief, the members.
 
-`Run sheet: DEMO 8, "Propose RotateKey 06 to 06b".`
+`Run sheet: propose rotate`
 
 *Hand Sipho the spare card, 06b.*
 
@@ -454,7 +453,7 @@ Four signatures again. Same as before.
 
 *Four volunteers scan and sign on their phones, then execute.*
 
-`Run sheet: DEMO 8, execute after the timelock.`
+`Run sheet: execute`
 
 Now, the thief. That's me, with the old card.
 
@@ -483,7 +482,7 @@ contract remembers members, not keys.
 One more thing, because I promised the relayer can't be trusted and I should prove it doesn't
 matter.
 
-`Run sheet: DEMO 9, "Stop the relayer".`
+`Run sheet: kill`
 
 The backend just died. The dashboard still has the bank page, still has the chain page, still
 has every event, because it reads them from the chain, not from my server.
@@ -545,5 +544,5 @@ Thank you to my committee. *Name them.* Thank you.
 ## If a demo fails
 
 Say this, and move on: "That's the live path. The recorded one is behind it." Then press the
-fallback toggle in the run sheet and step the same demo from the script. The details are
+`fallback on` in the run sheet and `fallback next` through the same demo from the script. The details are
 in `FALLBACK.md`. Never apologise twice.

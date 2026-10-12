@@ -71,7 +71,5 @@ ssh "$SSH_HOST" "chown stokvel:stokvel $APP/contracts/deployments/*
 
 echo
 echo "  Armed: $(python3 -c 'import json;d=json.load(open("contracts/deployments/31337.json"));print("contract", d["stokvel"])')"
-if [[ -f cards/out/talk-secrets.env ]]; then
-  pass=$(grep -E '^PRESENTER_PASS=' cards/out/talk-secrets.env | cut -d= -f2-)
-  [[ -n $pass ]] && { step "check from outside"; PRESENTER_USER=presenter PRESENTER_PASS=$pass ./deploy/check.sh "https://$DOMAIN" || true; }
-fi
+step "check from outside"
+./deploy/check.sh "https://$DOMAIN" || true

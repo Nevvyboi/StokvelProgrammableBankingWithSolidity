@@ -42,8 +42,8 @@ killed and restarted, and nothing is lost or sent twice.
 - `/sign` the signing station: scans a card, shows one English sentence, signs it, forgets the key.
 - `/watch` the audience: read only, mobile first, Basescan links.
 - `/` also carries the run sheet: a sidebar (D) with one button per demo step, each showing the
-  call it makes, the screen zoom and the fallback switch. `/presenter` is only the login door:
-  behind the password on a server, it sends you back to `/` with the run sheet unlocked.
+  call it makes, the screen zoom and the fallback switch. It's a console: type `monthend`, and it
+  prints the calls that makes, runs them, and prints what came back. No logins: a one-off talk.
 
 ## Packages
 

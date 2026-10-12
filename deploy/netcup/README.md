@@ -35,7 +35,7 @@ still works with these scripts: `CHAIN_ID=84532`, see the end of this file.)
 | user `stokvel` | system user the services run as |
 | `/etc/systemd/system/stokvel-{stage,relayer,mock}.service` (+ `.d/netcup.conf`) | the three services, bound to `172.18.0.1` |
 | `/etc/systemd/system/stokvel-anvil.service`, `/opt/stokvel/.foundry`, `/var/lib/stokvel/anvil.json` | the chain: Anvil on `127.0.0.1:8545`, its binary, its state file |
-| `/etc/letsencrypt/stokvel/site.conf`, `htpasswd` | our nginx server block and the presenter login (this folder is already mounted into the nginx container, so no new mount) |
+| `/etc/letsencrypt/stokvel/site.conf` | our nginx server block (this folder is already mounted into the nginx container, so no new mount) |
 | `/etc/letsencrypt/{live,archive,renewal}/stokvel.nevvy.studio*` | the certificate |
 | one line in `/opt/DataBrew/nginx/nginx.conf` | `include /etc/letsencrypt/stokvel/site.conf;  # stokvel-talk: remove after the talk` |
 | `/opt/DataBrew/nginx/nginx.conf.bak-stokvel` | the file as it was before that line |
@@ -44,7 +44,7 @@ still works with these scripts: `CHAIN_ID=84532`, see the end of this file.)
 | Elsewhere | What |
 |---|---|
 | Squarespace DNS | `A stokvel → 152.53.135.28` (no AAAA: the 443 blocks on this nginx are IPv4) |
-| This laptop | this repo, `cards/out/` (card keys and the presenter login, gitignored), Foundry |
+| This laptop | this repo, `cards/out/` (card keys, gitignored), Foundry |
 
 Nothing on any public chain, and no accounts anywhere.
 
@@ -53,7 +53,6 @@ Nothing on any public chain, and no accounts anywhere.
 ```
 phone / projector ─▶ stokvel.nevvy.studio:443 ─▶ databrew-nginx-1 (container)
                                                    │ server_name stokvel.nevvy.studio
-                                                   │   /presenter, /relayer/admin/*, /mock/* … → auth_basic
                                                    ├─▶ 172.18.0.1:3000  stage app   (systemd)
                                                    ├─▶ 172.18.0.1:4000  relayer     (systemd) ─┐
                                                    └─▶ 172.18.0.1:4100  mock bank   (systemd)  │
@@ -63,7 +62,8 @@ phone / projector ─▶ stokvel.nevvy.studio:443 ─▶ databrew-nginx-1 (conta
 `172.18.0.1` is the host's address on the `databrew_backend` Docker network, the same way
 nginx already reaches floati on `172.18.0.1:8001`. Services bound there are reachable by the
 nginx container but not from the internet, so no firewall change is needed. The server block
-copies `deploy/Caddyfile` exactly: the same public paths, the same password-protected levers.
+copies `deploy/Caddyfile`: the same paths. There are no logins: the run sheet on the projector
+page pulls the levers, and the card keys are never on the server.
 
 ## Resources
 
@@ -101,10 +101,10 @@ file would leave nginx on the old one); and the services find each other on `172
    git clone https://github.com/Nevvyboi/StokvelProgrammableBankingWithSolidity.git /opt/stokvel
    /opt/stokvel/deploy/netcup/setup.sh     # creates /etc/stokvel/stokvel.env and stops
    nano /etc/stokvel/stokvel.env           # RPC_URL=http://127.0.0.1:8545, CHAIN_ID=31337, SPARE_ADDRESS
-   PRESENTER_PASS=… /opt/stokvel/deploy/netcup/setup.sh
+   /opt/stokvel/deploy/netcup/setup.sh
    ```
 
-   `SPARE_ADDRESS` and the presenter password are in `cards/out/talk-secrets.env`. The relayer's
+   `SPARE_ADDRESS` is in `cards/out/talk-secrets.env`. The relayer's
    keys stay empty: on Anvil it uses Anvil's funded accounts. Updating later: push, then
    `git -C /opt/stokvel pull` and `setup.sh` again.
 4. **Arm**, from the laptop, the day before the talk and after every rehearsal:

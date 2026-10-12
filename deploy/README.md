@@ -8,7 +8,7 @@ doesn't matter whether the room is on venue Wi-Fi or mobile data.
  Audience phones ─┐
  Projector laptop ┼─ https://stokvel.yourdomain.com ─▶ Caddy ─┬─▶ stage app   127.0.0.1:3000
  Signing station ─┤      (the only open door)                 ├─▶ relayer     127.0.0.1:4000 ─▶ Base Sepolia
- You (presenter) ─┘      /presenter needs a password          └─▶ mock bank   127.0.0.1:4100
+ You (presenter) ─┘      no logins: a one-off talk            └─▶ mock bank   127.0.0.1:4100
 ```
 
 | Address | Who opens it | Open to |
@@ -16,7 +16,6 @@ doesn't matter whether the room is on venue Wi-Fi or mobile data.
 | `https://<domain>/` | the projector | everyone |
 | `https://<domain>/watch` | the audience's phones, from the QR (`qr.sh`) | everyone |
 | `https://<domain>/sign` | the signing station laptop | everyone (the key never leaves the page) |
-| `https://<domain>/presenter` | you, once: log in, and it brings you back to `/` with the run sheet open | **password** |
 
 **Why Base Sepolia and not Anvil on the server.** The talk's promise is "you don't have to take my
 word for any of this." A private chain on your own server is a database you control, so the room
@@ -40,7 +39,7 @@ whole public surface:
 | `/api/rpc` | yes, **read only** | browsers read the chain through the server. Only reads of the two Stokvel contracts are forwarded: no transactions, no calls to other contracts. Your RPC provider key stays on the server |
 | `/relayer/feed`, `/bank`, `/health`, `/nonce/*` | yes | what the screens read |
 | `/relayer/join`, `/relayer/votes` | yes | a member's signature. The contract decides if it's valid; a bad one fails before any gas is spent |
-| `/presenter`, `/relayer/admin/*`, `/relayer/propose`, `/relayer/execute`, `/relayer/webhook/*`, `/mock/*` | **password** | the levers: steal, swipe, skip, propose, kill. Without the password, someone in the room could run your demos for you |
+| `/relayer/admin/*`, `/relayer/propose`, `/relayer/execute`, `/mock/*` | yes, **no login** | the levers the run sheet pulls. A one-off talk with nothing real behind it, so no password; the card keys are never on the server |
 | `/api/keys` | **never** | the card keys are not on the server at all, and the route is off (`DEMO_MODE=false`) |
 
 [`check.sh`](check.sh) tests every row of this table from the outside. Run it after every change.
@@ -176,8 +175,7 @@ stops so you can fill them in:
 
 ```bash
 nano /etc/stokvel/stokvel.env      # RPC_URL, RELAYER_PK, ATTESTOR_PK, SPARE_ADDRESS
-caddy hash-password                # type the presenter password, copy the $2a$... line
-nano /etc/stokvel/caddy.env        # STOKVEL_DOMAIN, ACME_EMAIL, PRESENTER_USER, PRESENTER_HASH
+nano /etc/stokvel/caddy.env        # STOKVEL_DOMAIN, ACME_EMAIL
 ```
 
 - `RELAYER_PK` and `ATTESTOR_PK` are the throwaway keys behind the `RELAYER` and `ATTESTOR`
@@ -203,10 +201,10 @@ From your laptop, ideally on your phone's hotspot so you're outside any network 
 trusts:
 
 ```bash
-PRESENTER_USER=presenter PRESENTER_PASS='<the password>' ./deploy/check.sh https://<domain>
+./deploy/check.sh https://<domain>
 ```
 
-Every line should say `ok`: public pages open, presenter routes asking for a password, the chain
+Every line should say `ok`: public pages open, the card keys off, the chain
 reading through the proxy (including the full event history), transactions refused, HTTP
 redirecting to HTTPS, and the internal ports closed. Then open `https://<domain>/watch` on your
 phone, on mobile data.
@@ -226,7 +224,7 @@ lectern. The deck doesn't have one yet: the QR on the closing slide is the repo 
 |---|---|---|
 | Projector laptop | `https://<domain>/` | full screen, extended display (not mirrored) |
 | Signing station | `https://<domain>/sign` | USB scanner, or the webcam (which works because the site is HTTPS) |
-| The projector laptop, once | `https://<domain>/presenter` | log in; it brings you back to `/` with the run sheet (the sidebar, D) unlocked. The room sees each command as you press it |
+| The projector laptop | `https://<domain>/` | D opens the run sheet over the board. The room sees each command as you type it |
 | Phones | the QR | read only |
 
 What's different from a local `demo.sh` run:
@@ -266,7 +264,6 @@ source of truth). After a redeploy of the contract, commit the new `deployments/
 | Projector says `chain down` | the RPC key is wrong, or its plan caps `eth_getLogs` | `check.sh` names which; `journalctl -u stokvel-stage` |
 | Projector says `relayer down` | relayer crashed or is restarting | `journalctl -u stokvel-relayer -f` |
 | Relayer log: `insufficient funds` | the relayer or attestor key ran out of Base Sepolia ETH | top it up from a faucet |
-| Presenter asks for the password on every click | the browser didn't keep the login | open `/presenter` and log in first; use a normal (not private) window |
 | `/sign`: "Not a member" for a real card | the contract was deployed without `MEMBERS_FILE=../cards/out/members.json`, or the cards were regenerated after printing | redeploy with the printed cards' `members.json` |
 | DEMO 8's propose button logs "no card 06b" | `SPARE_ADDRESS` is empty | set it in `stokvel.env`, run `setup.sh` |
 
@@ -288,7 +285,7 @@ Logs: `journalctl -u <service> -f` for `stokvel-stage`, `stokvel-relayer`, `stok
 | [`setup.sh`](setup.sh) | installs, configures, updates; safe to rerun |
 | [`check.sh`](check.sh) | the outside-in test of what's public and what isn't |
 | [`qr.sh`](qr.sh) | the `/watch` QR for the slide |
-| [`Caddyfile`](Caddyfile) | HTTPS, the presenter password, and the routing |
+| [`Caddyfile`](Caddyfile) | HTTPS and the routing |
 | [`systemd/`](systemd/) | the services: stage, relayer, mock bank, sandbox overlay, Caddy's env |
 | [`stokvel.env.example`](stokvel.env.example), [`caddy.env.example`](caddy.env.example) | the two config files `setup.sh` copies to `/etc/stokvel/` |
 
