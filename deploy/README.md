@@ -24,6 +24,10 @@ would have to take your word for it. On Base Sepolia, every line on `/watch` lin
 and nobody has to trust your server. The cost is real time: month end happens at a time you choose
 in advance, and votes wait out the actual timelock (step 5 keeps both short).
 
+**Sharing a server that already runs other sites behind nginx?** Don't use `setup.sh` (it installs
+Caddy and turns on the firewall). [`netcup/`](netcup/README.md) does the same behind an existing
+nginx container, and takes itself off again afterwards.
+
 ## What's public and what isn't
 
 The stage app, the relayer and the mock bank listen on `127.0.0.1` only, and the firewall allows
