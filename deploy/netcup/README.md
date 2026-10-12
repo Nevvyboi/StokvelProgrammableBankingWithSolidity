@@ -37,7 +37,7 @@ used.
 |---|---|
 | Squarespace DNS | `A stokvel → 152.53.135.28` (no AAAA: the 443 blocks on this nginx are IPv4) |
 | Base Sepolia | the contract (stays on chain forever; that's fine, it's a testnet) |
-| RPC provider, Basescan | one API key each |
+| RPC, explorer | nothing: the public Tenderly gateway and Blockscout need no account |
 | This laptop | this repo, `cards/out/` (card keys, gitignored), Foundry |
 
 ## How the traffic flows
@@ -84,14 +84,30 @@ file would leave nginx on the old one); and the services find each other on `172
 
 1. **DNS:** Squarespace → Domains → nevvy.studio → DNS → add `A`, host `stokvel`, data
    `152.53.135.28`, TTL 5 min. Wait for `dig +short stokvel.nevvy.studio` to show the IP.
-2. **Laptop tools:** `curl -L https://foundry.paradigm.xyz | bash && foundryup`.
-3. **Cards (once):** `cd cards && pip install -r requirements.txt && python3 generate.py`. Back up
+2. **Laptop tools:** `curl -L https://foundry.paradigm.xyz | bash && foundryup`. (Done 2026-10-12.)
+3. **Cards (once; done 2026-10-12):** `cd cards && pip install -r requirements.txt && python3 generate.py`. Back up
    `cards/out/` somewhere outside the repo; send `cards.pdf` to print.
-4. **Keys:** three throwaway keys (deployer, relayer, attestor) from a Base Sepolia faucet; an
-   Alchemy (or similar) Base Sepolia key; a Basescan API key.
-5. **Deploy the contract** (`deploy/README.md` step 5, with `TIMELOCK=30` and
-   `FIRST_ROUND_ENDS_AT` from `TZ=Africa/Johannesburg date -j -f "%Y-%m-%d %H:%M" "<talk date> <time>" +%s`).
-   Commit and push `contracts/deployments/84532.json`.
+4. **Keys, no accounts needed** (all of it in the gitignored `cards/out/talk-secrets.env`, chmod 600):
+   - **one funded key.** The relayer key also deploys the contract (the deployer has no role in
+     it), and the attestor only signs, never sends, so only `RELAYER` needs Base Sepolia ETH:
+     about 0.05 from a faucet.
+   - **RPC:** `https://base-sepolia.gateway.tenderly.co`, public, no key. On 2026-10-12 it was the
+     only public endpoint that served `eth_getLogs` over 400,000 blocks (`sepolia.base.org` caps it
+     at 200, drpc at 10,000, publicnode at 50,000). `check.sh` re-tests this.
+   - **Verification on Blockscout,** which needs no API key, instead of Basescan.
+5. **Deploy the contract** once the talk's date and time are fixed:
+
+   ```bash
+   set -a; . cards/out/talk-secrets.env; set +a
+   export MEMBERS_FILE=../cards/out/members.json TIMELOCK=30
+   export FIRST_ROUND_ENDS_AT=$(TZ=Africa/Johannesburg date -j -f "%Y-%m-%d %H:%M" "<talk date> <DEMO 3 time>" +%s)
+   cd contracts && forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast --private-key $RELAYER_PK \
+     --verify --verifier blockscout --verifier-url https://base-sepolia.blockscout.com/api/
+   ```
+
+   Commit and push `contracts/deployments/84532.json`. On the server, add
+   `EXPLORER_URL=https://base-sepolia.blockscout.com` to `stokvel.env` so the links go where the
+   source is readable.
 6. **Server:** `ssh floati`, then:
 
    ```bash
@@ -101,8 +117,9 @@ file would leave nginx on the old one); and the services find each other on `172
    /opt/stokvel/deploy/netcup/setup.sh          # builds, starts, asks for the presenter password
    ```
 
-   Until this branch is merged, put `BRANCH=deploy/netcup` in front of the setup commands and add
-   `--branch deploy/netcup` to the clone. Updating later: push, then run `setup.sh` again.
+   Take the values from `cards/out/talk-secrets.env`; pass the presenter password as
+   `PRESENTER_PASS=… setup.sh` or type it when asked. Updating later: push, then run `setup.sh`
+   again.
 7. **Check:** `PRESENTER_USER=presenter PRESENTER_PASS=… ./deploy/check.sh https://stokvel.nevvy.studio`
    from your phone's hotspot. Then open `/watch` on your phone over mobile data.
 8. **QR:** `brew install qrencode && ./deploy/qr.sh https://stokvel.nevvy.studio`.
@@ -120,7 +137,7 @@ the fallback tab.
    `stokvel` user, Node and the NodeSource list, and confirms databrew.works, floati.life and
    redlineclause.com still return 200.
 2. **DNS:** delete the `stokvel` A record in Squarespace.
-3. **Accounts:** delete the RPC provider key and the Basescan key.
+3. **Accounts:** none were made (public RPC, Blockscout). If you added a provider key later, delete it.
 4. **Keys:** the card, relayer, attestor and deployer keys are burned (they've been on stage). Never
    reuse them; there's nothing to recover from them.
 5. **This laptop:** make sure everything worth keeping is pushed to GitHub, then delete

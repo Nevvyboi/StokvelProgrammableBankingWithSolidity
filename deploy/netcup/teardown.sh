@@ -124,6 +124,6 @@ cat <<EOF
 
   The talk is off this server. Still to do, elsewhere:
     - Squarespace DNS: delete the 'stokvel' A record
-    - delete the RPC provider key and the Basescan key
+    - if you made an RPC provider or Basescan key, delete it
     - your laptop: deploy/netcup/README.md, "After the talk"
 EOF
