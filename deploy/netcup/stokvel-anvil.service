@@ -1,0 +1,27 @@
+# deploy/netcup, CHAIN_ID=31337: the talk's own chain. Anvil on loopback only: the relayer and the
+# stage app's read-only /api/rpc proxy reach it, nothing else does. The state file keeps the
+# contract and the seeded months across restarts; deploy/netcup/arm.sh starts it fresh.
+[Unit]
+Description=Stokvel chain (Anvil)
+After=network-online.target
+
+[Service]
+User=stokvel
+Group=stokvel
+WorkingDirectory=/var/lib/stokvel
+# --prune-history keeps memory flat over weeks of 2 second blocks; logs and receipts stay, so the
+# dashboard still reads every event since the deploy
+ExecStart=/opt/stokvel/.foundry/bin/anvil --host 127.0.0.1 --port 8545 --block-time 2 --silent --prune-history 100 --state /var/lib/stokvel/anvil.json --state-interval 30
+Restart=always
+RestartSec=2
+StateDirectory=stokvel
+# a ceiling, so a runaway chain can only ever take itself down, never the sites beside it
+MemoryMax=700M
+
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

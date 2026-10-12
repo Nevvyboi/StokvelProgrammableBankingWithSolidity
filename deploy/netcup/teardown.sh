@@ -16,7 +16,7 @@ NGINX_CONF=/opt/DataBrew/nginx/nginx.conf
 SITE=/etc/letsencrypt/stokvel
 MARK="# stokvel-talk: remove after the talk (deploy/netcup/teardown.sh)"
 SWAP=/swapfile-stokvel
-UNITS=(stokvel-stage stokvel-relayer stokvel-mock stokvel-overlay)
+UNITS=(stokvel-stage stokvel-relayer stokvel-mock stokvel-overlay stokvel-anvil)
 NEIGHBOURS=(https://databrew.works https://floati.life https://redlineclause.com)
 
 step() { printf '\n\033[36m▸ %s\033[0m\n' "$*"; }
@@ -124,6 +124,6 @@ cat <<EOF
 
   The talk is off this server. Still to do, elsewhere:
     - Squarespace DNS: delete the 'stokvel' A record
-    - delete the RPC provider key and the Basescan key
+    - if you made an RPC provider or Basescan key, delete it
     - your laptop: deploy/netcup/README.md, "After the talk"
 EOF

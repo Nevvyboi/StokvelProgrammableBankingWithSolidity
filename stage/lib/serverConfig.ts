@@ -10,14 +10,15 @@ export function serverConfig(): StageConfig {
   const chainId = Number(process.env.CHAIN_ID ?? 31337);
   const file = resolve(process.cwd(), "..", "contracts", "deployments", `${chainId}.json`);
   const d = existsSync(/*turbopackIgnore: true*/ file) ? JSON.parse(readFileSync(/*turbopackIgnore: true*/ file, "utf8")) : {};
-  const explorer = process.env.EXPLORER_URL ?? (chainId === 84532 ? "https://sepolia.basescan.org" : null);
+  const explorer = process.env.EXPLORER_URL || (chainId === 84532 ? "https://sepolia.basescan.org" : null);
+  // || not ??: stokvel.env leaves unused values empty (STOKVEL_ADDRESS=), and empty means "not set"
   return {
     // what the browser connects to. On a public server this is /api/rpc, so phones never need to
     // reach a node themselves and the provider key in RPC_URL stays on the server
     rpcUrl: process.env.PUBLIC_RPC_URL ?? process.env.NEXT_PUBLIC_RPC_URL ?? upstreamRpcUrl(),
     chainId,
-    stokvel: process.env.STOKVEL_ADDRESS ?? d.stokvel ?? null,
-    stokvelV1: process.env.STOKVEL_V1_ADDRESS ?? d.stokvelV1 ?? null,
+    stokvel: process.env.STOKVEL_ADDRESS || d.stokvel || null,
+    stokvelV1: process.env.STOKVEL_V1_ADDRESS || d.stokvelV1 || null,
     relayerUrl: process.env.RELAYER_URL ?? "http://127.0.0.1:4000",
     mockUrl: process.env.MOCK_URL ?? "http://127.0.0.1:4100",
     explorerUrl: explorer,
