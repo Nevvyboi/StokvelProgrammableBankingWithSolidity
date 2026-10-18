@@ -16,7 +16,7 @@ NGINX_CONF=/opt/DataBrew/nginx/nginx.conf
 SITE=/etc/letsencrypt/stokvel
 MARK="# stokvel-talk: remove after the talk (deploy/netcup/teardown.sh)"
 SWAP=/swapfile-stokvel
-UNITS=(stokvel-stage stokvel-relayer stokvel-mock stokvel-overlay stokvel-anvil)
+UNITS=(stokvel-stage stokvel-relayer stokvel-mock stokvel-overlay stokvel-anvil stokvel-reset)
 NEIGHBOURS=(https://databrew.works https://floati.life https://redlineclause.com)
 
 step() { printf '\n\033[36m▸ %s\033[0m\n' "$*"; }
@@ -79,7 +79,8 @@ rm -rf "$SITE" && echo "  $SITE removed"
 step "services"
 for u in "${UNITS[@]}"; do
   systemctl disable --now "$u" >/dev/null 2>&1 || true
-  rm -rf "/etc/systemd/system/$u.service" "/etc/systemd/system/$u.service.d"
+  systemctl disable --now "$u.timer" >/dev/null 2>&1 || true
+  rm -rf "/etc/systemd/system/$u.service" "/etc/systemd/system/$u.service.d" "/etc/systemd/system/$u.timer"
 done
 systemctl daemon-reload
 systemctl reset-failed "${UNITS[@]}" >/dev/null 2>&1 || true

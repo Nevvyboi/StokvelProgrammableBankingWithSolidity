@@ -35,6 +35,7 @@ still works with these scripts: `CHAIN_ID=84532`, see the end of this file.)
 | user `stokvel` | system user the services run as |
 | `/etc/systemd/system/stokvel-{stage,relayer,mock}.service` (+ `.d/netcup.conf`) | the three services, bound to `172.18.0.1` |
 | `/etc/systemd/system/stokvel-anvil.service`, `/opt/stokvel/.foundry`, `/var/lib/stokvel/anvil.json` | the chain: Anvil on `127.0.0.1:8545`, its binary, its state file |
+| `/var/lib/stokvel/armed.json`, `/etc/systemd/system/stokvel-reset.{service,timer}` | the chain as `arm.sh` seeded it, and the nightly reset (04:30) back to it. Anvil keeps every block in memory, about 250 MB a day, so it can't run for weeks unreset; and a state file left unreadable (Anvil killed while saving) is set aside and the snapshot restored before Anvil starts, instead of failing every start |
 | `/etc/letsencrypt/stokvel/site.conf` | our nginx server block (this folder is already mounted into the nginx container, so no new mount) |
 | `/etc/letsencrypt/{live,archive,renewal}/stokvel.nevvy.studio*` | the certificate |
 | one line in `/opt/DataBrew/nginx/nginx.conf` | `include /etc/letsencrypt/stokvel/site.conf;  # stokvel-talk: remove after the talk` |

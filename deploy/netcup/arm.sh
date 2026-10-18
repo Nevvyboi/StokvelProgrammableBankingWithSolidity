@@ -29,7 +29,7 @@ MEMBERS=../cards/out/members.json
 step "server: a fresh chain"
 ssh "$SSH_HOST" "grep -qE '^CHAIN_ID=31337' /etc/stokvel/stokvel.env || { echo 'stokvel.env is not CHAIN_ID=31337'; exit 1; }
   systemctl stop stokvel-relayer stokvel-mock stokvel-anvil
-  rm -f /var/lib/stokvel/anvil.json $APP/contracts/deployments/31337.json $APP/contracts/deployments/demo-ledger.jsonl
+  rm -f /var/lib/stokvel/anvil.json /var/lib/stokvel/armed.json $APP/contracts/deployments/31337.json $APP/contracts/deployments/demo-ledger.jsonl
   systemctl start stokvel-anvil"
 
 step "tunnel to the server's Anvil"
@@ -58,6 +58,13 @@ if [[ $SEED -eq 1 ]]; then
   fs --sig "closeAndSettle()"
   fs --sig "midMonth()"
 fi
+
+step "server: save this chain as the armed snapshot (the nightly reset and a broken state file go back to it)"
+kill $TUNNEL 2>/dev/null || true
+ssh "$SSH_HOST" "systemctl stop stokvel-anvil   # a normal stop saves the state file
+  cp -p /var/lib/stokvel/anvil.json /var/lib/stokvel/armed.json
+  node -e 'JSON.parse(require(\"fs\").readFileSync(process.argv[1], \"utf8\"))' /var/lib/stokvel/armed.json && echo '  armed.json saved'
+  systemctl start stokvel-anvil"
 
 step "server: the deployment and the bank's ledger, then the relayer and the bank"
 files=(contracts/deployments/31337.json)
