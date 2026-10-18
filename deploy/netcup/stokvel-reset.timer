@@ -1,0 +1,10 @@
+# deploy/netcup: run stokvel-reset every night at 04:30 (server time)
+[Unit]
+Description=Stokvel: nightly chain reset
+
+[Timer]
+OnCalendar=*-*-* 04:30:00
+Persistent=false
+
+[Install]
+WantedBy=timers.target

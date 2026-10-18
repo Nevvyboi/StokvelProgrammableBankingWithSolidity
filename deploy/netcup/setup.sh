@@ -136,7 +136,7 @@ fi
 # ---------------------------------------------------------------- services, on the Docker gateway
 step "services: stage, relayer, $([[ $sandbox -eq 1 ]] && echo 'sandbox overlay' || echo 'mock bank')"
 install -m 644 "$APP"/deploy/systemd/stokvel-*.service /etc/systemd/system/
-[[ $anvil -eq 1 ]] && install -m 644 "$HERE/stokvel-anvil.service" /etc/systemd/system/
+[[ $anvil -eq 1 ]] && install -m 644 "$HERE"/stokvel-{anvil,reset}.service "$HERE/stokvel-reset.timer" /etc/systemd/system/
 dropin() { install -d "/etc/systemd/system/$1.service.d"; cat > "/etc/systemd/system/$1.service.d/netcup.conf"; }
 # the units bind to 127.0.0.1 for Caddy; here nginx lives in a container, so they bind to the
 # host's address on its network instead, and find each other there
@@ -176,7 +176,7 @@ armed=1
 if [[ $anvil -eq 1 ]]; then
   # the chain only starts here; restarting it would be harmless (it reloads its state file) but
   # there's no need. Without a deployment the relayer has nothing to watch: arm.sh starts it
-  systemctl enable --quiet --now stokvel-anvil
+  systemctl enable --quiet --now stokvel-anvil stokvel-reset.timer
   [[ -f $APP/contracts/deployments/31337.json ]] || armed=0
 fi
 systemctl enable --quiet "${services[@]}"

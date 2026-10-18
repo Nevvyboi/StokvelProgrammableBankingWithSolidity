@@ -1,0 +1,13 @@
+# deploy/netcup: the nightly reset (stokvel-reset.timer). Anvil keeps every block in memory, about
+# 250 MB a day, so a chain left running for weeks would reach its MemoryMax and be killed. Every
+# night the chain goes back to the snapshot arm.sh saved, and the bank and the relayer with it:
+# memory starts again from a few tens of MB, and every morning is the seeded state.
+[Unit]
+Description=Stokvel: reset the chain to the armed snapshot
+
+[Service]
+Type=oneshot
+ExecStart=/bin/systemctl stop stokvel-relayer stokvel-mock stokvel-anvil
+ExecStart=/usr/sbin/runuser -u stokvel -- /opt/stokvel/deploy/netcup/anvil-state.sh reset
+# whatever happened above, the chain, the bank and the relayer come back up
+ExecStopPost=/bin/systemctl start stokvel-anvil stokvel-mock stokvel-relayer

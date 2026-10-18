@@ -1,6 +1,7 @@
 # deploy/netcup, CHAIN_ID=31337: the talk's own chain. Anvil on loopback only: the relayer and the
 # stage app's read-only /api/rpc proxy reach it, nothing else does. The state file keeps the
-# contract and the seeded months across restarts; deploy/netcup/arm.sh starts it fresh.
+# contract and the seeded months across restarts; deploy/netcup/arm.sh starts it fresh and saves
+# the seeded chain as armed.json, which a broken state file and the nightly reset go back to.
 [Unit]
 Description=Stokvel chain (Anvil)
 After=network-online.target
@@ -9,11 +10,14 @@ After=network-online.target
 User=stokvel
 Group=stokvel
 WorkingDirectory=/var/lib/stokvel
-# --prune-history keeps memory flat over weeks of 2 second blocks; logs and receipts stay, so the
-# dashboard still reads every event since the deploy
+# an unreadable state file (Anvil killed while saving) would fail every start: set it aside first
+ExecStartPre=/opt/stokvel/deploy/netcup/anvil-state.sh check
+# --prune-history keeps old states out of memory, but every block still costs some (about 250 MB a
+# day with the relayer's attestations): stokvel-reset.timer puts the armed snapshot back nightly.
+# Logs and receipts stay, so the dashboard still reads every event since the deploy
 ExecStart=/opt/stokvel/.foundry/bin/anvil --host 127.0.0.1 --port 8545 --block-time 2 --silent --prune-history 100 --state /var/lib/stokvel/anvil.json --state-interval 30
 Restart=always
-RestartSec=2
+RestartSec=5
 StateDirectory=stokvel
 # a ceiling, so a runaway chain can only ever take itself down, never the sites beside it
 MemoryMax=700M
