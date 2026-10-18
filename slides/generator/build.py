@@ -207,7 +207,7 @@ class Deck:
         return self.picture(s, p, 0, 0, w=W)
 
     def divider(self, s, n, title, promise, cut=False):
-        self.running_head(s, f"Demo {n}", "live · sandbox and testnet only" + ("  ·  ✂ can be cut" if cut else ""))
+        self.running_head(s, f"Demo {n}", "live · simulated bank, private test chain" + ("  ·  ✂ can be cut" if cut else ""))
         self.text(s, MX, 1.4, 6, 1.6, [[(f"DEMO {n}", {"font": DISPLAY, "size": 96, "bold": True, "colour": self.t["dim"]})]])
         self.text(s, MX, 3.15, 11.5, 1.2, [[(title, {"font": DISPLAY, "size": 54, "bold": False})]])
         self.text(s, MX, 4.45, 10.5, 1.3, promise, size=26, colour=self.t["muted"], spacing=1.25)
@@ -364,7 +364,7 @@ def build(theme: str, out: Path):
 
     # 7 demo 1
     s = d.slide(7)
-    d.divider(s, 1, "The committee", "Six volunteers, six cards, one constitution. Nobody types a name in: the chain knows each member from a signature.")
+    d.divider(s, 1, "The committee", "Six volunteers, six cards, six phones, one constitution. Nobody types a name in: the chain knows each member from a signature.")
 
     # 8 demo 2
     s = d.slide(8)

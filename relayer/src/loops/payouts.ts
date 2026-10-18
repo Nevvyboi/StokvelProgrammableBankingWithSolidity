@@ -29,8 +29,19 @@ export function createPayoutLoop(o: {
   const inFlight = new Set<string>();
   let lastCloseError: string | null = null;
 
-  /** Try to close the round. Returns the contract's reason when it can't. */
-  async function tryClose(): Promise<{ closed: boolean; reason?: string }> {
+  /**
+   * Try to close the round. Returns the contract's reason when it can't. One close at a time: the
+   * loop and a presenter's tick can both find the round due in the same instant, and the second
+   * write would revert (the round it closes is already gone) and throw.
+   */
+  let closing: Promise<{ closed: boolean; reason?: string }> | null = null;
+  function tryClose(): Promise<{ closed: boolean; reason?: string }> {
+    closing ??= closeOnce().finally(() => {
+      closing = null;
+    });
+    return closing;
+  }
+  async function closeOnce(): Promise<{ closed: boolean; reason?: string }> {
     const [block, endsAt] = await Promise.all([publicClient.getBlock(), contract.read.roundEndsAt()]);
     if (block.timestamp < BigInt(endsAt)) return { closed: false, reason: "RoundStillOpen" };
     try {
@@ -47,15 +58,29 @@ export function createPayoutLoop(o: {
       }
       return { closed: false, reason: text };
     }
-    const hash = await contract.write.closeRound();
+    let hash: `0x${string}`;
+    try {
+      hash = await contract.write.closeRound();
+    } catch (err) {
+      // the round moved on between the simulation and the write: report it, don't throw
+      const d = decodeRevert(err);
+      return { closed: false, reason: d ? `${d.name}(${d.args.join(", ")})` : errorText(err) };
+    }
     lastCloseError = null;
     log.info({ hash }, "closeRound");
     feed.push({ kind: "info", title: "Round closed", detail: "the pot is due to the next member in rotation", hash });
     return { closed: true };
   }
 
-  /** Pay and confirm every unsettled round. */
-  async function settle(): Promise<number> {
+  /** Pay and confirm every unsettled round. One settle at a time, for the same reason as tryClose. */
+  let settling: Promise<number> | null = null;
+  function settle(): Promise<number> {
+    settling ??= settleOnce().finally(() => {
+      settling = null;
+    });
+    return settling;
+  }
+  async function settleOnce(): Promise<number> {
     const round = await contract.read.round();
     let settled = 0;
     for (let r = 0n; r < round; r++) {
@@ -101,6 +126,9 @@ export function createPayoutLoop(o: {
     if (o.shadow) void shadowPay(member, amount, myReference, theirReference);
 
     const hash = await contract.write.confirmPayout([round, beneficiaryId32(member.investecId), refOf(paymentRef)]);
+    // wait until it's mined, so the round stays in flight until the chain says settled: before,
+    // the next loop or tick could read it as unsettled in the seconds between and pay it again
+    await publicClient.waitForTransactionReceipt({ hash, timeout: 30_000 });
     log.info({ round: String(round), hash }, "confirmPayout");
     feed.push({ kind: "bank->chain", title: "Payout settled", detail: `round ${round + 1n} confirmed on chain`, hash });
   }

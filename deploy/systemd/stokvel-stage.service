@@ -1,4 +1,4 @@
-# The screens: projector, /sign, /watch, /presenter. Reachable only through Caddy.
+# The screens: projector (with the run sheet), /sign, /watch, and /presenter, the login door. Reachable only through Caddy.
 [Unit]
 Description=Stokvel stage app (Next.js)
 After=network-online.target

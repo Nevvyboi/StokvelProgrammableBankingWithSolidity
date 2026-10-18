@@ -71,7 +71,7 @@ export function Roster({ state, compact = false }: { state: ChainState; compact?
               </td>
               <td className="font-display font-medium">
                 {info.name}
-                {!m.joined && <span className="ml-2 text-sm font-normal text-muted">not signed</span>}
+                {m.joined ? <span className="ml-2 text-sm font-normal text-success">✓ signed in</span> : <span className="ml-2 text-sm font-normal text-muted">not signed</span>}
               </td>
               <td className="margin-note" style={{ color: info.colour }}>
                 {next ? "← this month's payout" : ""}

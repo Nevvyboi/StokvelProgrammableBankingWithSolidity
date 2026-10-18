@@ -8,11 +8,18 @@ minute slot; together they take out five minutes.
 
 **How to use this:** the deck carries the short notes (press N in the HTML deck, or read the notes
 pane in PowerPoint). This is the full version to rehearse out loud. Stage directions are in
-*italics*. Demo cues are in `code` and match the buttons on `/presenter`. Lines marked ★ are the
+*italics*. Demo cues are in `code`: `Run sheet: monthend` means type `monthend` into the run
+sheet, the console that slides over the projector page (D, or the tab on its right edge). The room
+sees what you typed, the calls it makes, and the board change behind it. `help` lists everything. Lines marked ★ are the
 ones to keep even when everything else goes sideways. Don't read it word for word on the night.
 
-The safety line, said once, out loud, before the first demo: "Everything you see tonight is the
-Investec sandbox and a test network. There is no real money here and no real person's data."
+**Zoom the projector** when a moment needs the room to read it: `zoom roster` (or bank, pot,
+minutes, quilt, all) in the run sheet; with the run sheet closed, the keys 1 to 5 and 0, a click,
+or Esc. Good
+moments: 3 while the committee signs in, 1 when the R3 lands, 2 for FROZEN.
+
+The safety line, said once, out loud, before the first demo: "Everything you see tonight is a
+simulated bank and a private test chain. There is no real money here and no real person's data."
 
 ---
 
@@ -151,7 +158,7 @@ twenty minutes.
 *Hand out the cards as they come up. Read the names off the cards: Lerato, Thabo, Aisha, Johan,
 Priya, Sipho. Give each person their number.*
 
-Before anything moves: everything you see tonight is the Investec sandbox and a test network.
+Before anything moves: everything you see tonight is a simulated bank and a private test chain.
 There is no real money here and no real person's data. These names are made up. These keys are
 worth nothing. Treat the card like cash anyway, because that's the habit we're teaching.
 
@@ -160,26 +167,40 @@ worth nothing. Treat the card like cash anyway, because that's the habit we're t
 This is the treasurer's book. Left page, the Investec account. Right page, the chain. Both of
 them live, both of them public.
 
-*Point at the signing station.*
+`Run sheet: zoom constitution`
 
-Lerato, come and be first. Turn your card over, hold the QR to the scanner.
+This is the club's constitution. Seven rules, and six empty lines at the bottom. The contract
+holds the fingerprint of exactly this text, so nobody can later claim you agreed to something
+else.
 
-`Signing station: scan card 01. The slip shows "Lerato signs the constitution of The Q4
-Stokvel." Press Sign.`
+Committee, take out your phones. Turn your card over and point your camera at the QR on the
+back. Tap the link it offers.
+
+`Volunteers' phones: each opens /sign holding their card. Lerato's slip says "Lerato signs the
+constitution of The Q4 Stokvel."`
+
+Lerato, read me what your phone says.
+
+*She reads it.*
 
 Look at the sentence. Not a hex string. English. That's what her card is signing, and the
-contract only accepts it because that card is member one. Press the button.
+contract only accepts it because that card is member one. Press Sign.
 
-*Wait for the minute book line: "Member joined".*
+*Wait for Lerato's name to land on her signature line.*
 
-And there it is on the right page. Nobody typed her name in. The chain knows her from the
-signature.
+And there she is, on her line. Signed. Nobody typed her name in. The chain knows her
+from the signature. Everybody else on the committee: Sign.
 
-*Get the other five through the station quickly. Talk over it.*
+*The other five land in a few seconds. Talk over it. If a phone won't scan, that card goes to
+the signing station at the side. The sixth signature brings up "Everyone has signed the
+constitution". Let it sit for a beat.*
 
-While the rest of the committee signs, everybody else: scan the QR on the screen. That's the
-audience page. Read only, same as the projector, and every line links to the block explorer. You
-don't have to take my word for any of this.
+★ Six strangers, one set of rules, and every signature their own. That's a stokvel.
+
+`Run sheet: zoom all`
+
+While they sign, everybody else: scan the QR on the screen. That's the audience page. Read only,
+the same record the projector shows, live on your phone.
 
 ---
 
@@ -189,7 +210,7 @@ don't have to take my word for any of this.
 
 Aisha, you're going to buy something. R87 at the bakery.
 
-`Presenter: DEMO 2, "Aisha swipes R87 at the bakery".`
+`Run sheet: swipe aisha 87`
 
 That button runs the actual card code, the file called main.js, the way Investec's card runtime
 would run it. It's about sixty lines, and it's in the repo. After the transaction goes through,
@@ -211,16 +232,12 @@ contract wrote it down. And look at the quilt.
 Every contribution adds a patch in that member's colour. It's a small thing, but I want the
 group's history to look like something the group made.
 
-If you're on the audience page, that event has a hash. Tap it. That's the contract, on a public
-test network, telling you what just happened, without me in the way.
+If you're on the audience page, that event has its transaction fingerprint next to it. That's
+the contract's record of what just happened, not mine.
 
-One honest note, because this is a room that will ask. Investec's sandbox is stateless. A
-transfer in the sandbox returns a real payment reference and then nothing changes. So there's a
-small proxy between the relayer and the sandbox. Every call goes through to Investec untouched.
-When the sandbox says yes to a transfer, the proxy writes that down under Investec's own reference,
-and the next time anyone asks for the balance, it adds it in. The sandbox forgets, the proxy
-remembers, and it never writes a rand the sandbox didn't accept first. The relayer can't tell,
-and that's the test.
+One honest note, because this is a room that will ask. The bank tonight is a mock of Investec's
+API, the same calls and the same shapes. The relayer can't tell the difference, and that's the
+test. The repo runs it against the real sandbox too.
 
 ---
 
@@ -252,7 +269,7 @@ treasurer, not me, not the person who deployed it. The order is the order.
 
 Let's get everybody paid up for the month.
 
-`Presenter: "before DEMO 3", click through the remaining members.`
+`Run sheet: pay all`
 
 *Roster fills with PAID stamps.*
 
@@ -262,7 +279,7 @@ the reconciliation line says the bank holds exactly that, signed. Covered.
 Now, it's the twenty-third of December, and I can't make you sit here until then, so on this
 local chain I'm allowed to move the clock.
 
-`Presenter: DEMO 3, "Skip to month end and settle".`
+`Run sheet: monthend`
 
 *Talk through the minute book as the lines arrive.*
 
@@ -293,8 +310,7 @@ what happens when they do?
 
 *Get the next month paid quickly, then steal.*
 
-`Presenter: "before DEMO 3" buttons again for the new month, then DEMO 4, "Take R1,000 out,
-then attest".`
+`Run sheet: pay all, then steal 1000`
 
 I've just moved a thousand rand from the stokvel account to my personal account, and I've
 labelled it "Admin fees". Very professional.
@@ -309,7 +325,7 @@ reconciliation.
 Bank holds twenty-nine thousand. Club is owed thirty. Short. And now let's try to close the
 month.
 
-`Presenter: DEMO 4, "Try to close the round".`
+`Run sheet: close`
 
 *The screen goes red. FROZEN.*
 
@@ -321,7 +337,7 @@ money goes missing quietly.
 
 *Take the hat off.*
 
-`Presenter: DEMO 4, "Put it back".`
+`Run sheet: putback`
 
 The money goes back, the next attestation shows it, the round closes. The club moves on. The
 treasurer, we'll deal with later.
@@ -344,7 +360,7 @@ one line. In version one, this line isn't there.
 
 Let's see what one line is worth. Version one first.
 
-`Presenter: DEMO 5, "V1: same transaction twice".`
+`Run sheet: double v1`
 
 Same bank transaction, sent twice. Version one records it twice. Priya has now paid ten thousand
 rand this month according to the chain, and five according to the bank. Two months from now,
@@ -352,7 +368,7 @@ she'd be paid out of money that doesn't exist.
 
 Version two.
 
-`Presenter: DEMO 5, "V2: same webhook twice".`
+`Run sheet: double v2`
 
 *The screen goes red. REFUSED.*
 
@@ -399,14 +415,13 @@ Let a machine try to make it false.
 The stokvel wants to raise the contribution. Five thousand to six. In a WhatsApp group this is
 a forty-message argument. Here it's a signature.
 
-`Presenter: DEMO 7, "Propose R5,000 to R6,000".`
+`Run sheet: propose raise`
 
 *Turn to the volunteers.*
 
-I need four of you at the signing station. Any four. Scan your card, read the sentence, press
-Sign.
+Any four of you: scan your card again, read the sentence, press Sign.
 
-*As the first slip shows:*
+*As the first phone shows the slip:*
 
 Read it out for me, Thabo. *"Thabo approves: raise the contribution from R5,000 to R6,000."*
 That's the message. Not a hash, not a transaction blob. A sentence a person can read before they
@@ -420,7 +435,7 @@ signed at eleven at night can still be looked at in the morning.
 
 *Skip the timelock and execute.*
 
-`Presenter: DEMO 7, "Execute".`
+`Run sheet: execute`
 
 Executed. The contribution is six thousand. And that same vote signed twice? Let's not even try
 it, there's a nonce in the signature, the second copy is dead on arrival. We tested it.
@@ -441,19 +456,19 @@ everything.
 
 Here, the committee can move Sipho's membership to a new card. Not the thief, the members.
 
-`Presenter: DEMO 8, "Propose RotateKey 06 to 06b".`
+`Run sheet: propose rotate`
 
 *Hand Sipho the spare card, 06b.*
 
 Four signatures again. Same as before.
 
-*Get four votes at the station, then execute.*
+*Four volunteers scan and sign on their phones, then execute.*
 
-`Presenter: DEMO 8, execute after the timelock.`
+`Run sheet: execute`
 
 Now, the thief. That's me, with the old card.
 
-`Signing station: scan the old card 06.`
+`Your phone: scan the old card 06.`
 
 *The slip says "Not a member". Show it.*
 
@@ -461,7 +476,7 @@ Now, the thief. That's me, with the old card.
 ever cast still counts, because votes are counted per member, not per card. But it will never
 sign as Sipho again.
 
-*Sipho scans 06b.*
+*Sipho scans 06b with a phone.*
 
 And Sipho, with the new card, is Sipho.
 
@@ -478,7 +493,7 @@ contract remembers members, not keys.
 One more thing, because I promised the relayer can't be trusted and I should prove it doesn't
 matter.
 
-`Presenter: DEMO 9, "Stop the relayer".`
+`Run sheet: kill`
 
 The backend just died. The dashboard still has the bank page, still has the chain page, still
 has every event, because it reads them from the chain, not from my server.
@@ -507,7 +522,9 @@ product. The real version is a proper club account.
 There's no tokenised rand here, on purpose. The day there is one that a bank stands behind,
 the bank half of this gets simpler.
 
-And these cards should be passkeys. A phone that signs, not a QR you can photograph.
+And these cards should be passkeys. Tonight you scanned a key into a website. That is exactly
+what a crypto scam looks like, and in real life you never do it. A phone that signs, not a QR
+you can photograph.
 
 *Credits.*
 
@@ -538,5 +555,5 @@ Thank you to my committee. *Name them.* Thank you.
 ## If a demo fails
 
 Say this, and move on: "That's the live path. The recorded one is behind it." Then press the
-fallback toggle on the presenter panel and step the same demo from the script. The details are
+`fallback on` in the run sheet and `fallback next` through the same demo from the script. The details are
 in `FALLBACK.md`. Never apologise twice.

@@ -181,3 +181,18 @@ body {
 .alarm {
   animation: alarm-field 1.4s ease-in-out infinite;
 }
+
+/* the constitution: a signature arriving on its line, and the pop-up when the sixth lands */
+@keyframes sig-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.sig-in { animation: sig-in 700ms ease-out; }
+@keyframes sig-pop {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: none; }
+}
+.sig-pop { animation: sig-pop 450ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .sig-in, .sig-pop { animation: none; }
+}
