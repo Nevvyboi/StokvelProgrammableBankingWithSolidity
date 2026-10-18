@@ -8,5 +8,6 @@ Description=Stokvel: reset the chain to the armed snapshot
 [Service]
 Type=oneshot
 ExecStart=/bin/systemctl stop stokvel-relayer stokvel-mock stokvel-anvil
-ExecStart=/usr/bin/runuser -u stokvel -- /opt/stokvel/deploy/netcup/anvil-state.sh reset
-ExecStart=/bin/systemctl start stokvel-anvil stokvel-mock stokvel-relayer
+ExecStart=/usr/sbin/runuser -u stokvel -- /opt/stokvel/deploy/netcup/anvil-state.sh reset
+# whatever happened above, the chain, the bank and the relayer come back up
+ExecStopPost=/bin/systemctl start stokvel-anvil stokvel-mock stokvel-relayer
